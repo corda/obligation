@@ -1,10 +1,12 @@
 package com.r3.corda.lib.obligation.states
 
+import com.r3.corda.lib.obligation.contracts.ObligationContract
 import com.r3.corda.lib.obligation.types.Payment
 import com.r3.corda.lib.obligation.types.PaymentStatus
 import com.r3.corda.lib.obligation.types.SettlementMethod
-import com.r3.corda.lib.tokens.money.Money
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.toStringShort
@@ -33,7 +35,8 @@ import java.time.Instant
  * 8. Obligations are considered in default if they are not fully paid by the dueDate, if one is specified.
  *
  */
-data class Obligation<T : Money>(
+@BelongsToContract(ObligationContract::class)
+data class Obligation<T : TokenType>(
         /** Obligations are always denominated in some token type as we need a reference for FX purposes. */
         val faceAmount: Amount<T>,
         /** The payer. Can be pseudo-anonymous. */
@@ -97,7 +100,7 @@ data class Obligation<T : Money>(
         }
     }
 
-    fun <U : Money> withNewFaceValueToken(newAmount: Amount<U>): Obligation<U> {
+    fun <U : TokenType> withNewFaceValueToken(newAmount: Amount<U>): Obligation<U> {
         return if (payments.isEmpty()) {
             Obligation(newAmount, obligor, obligee, dueBy, createdAt, settlementMethod, emptyList(), linearId)
         } else {

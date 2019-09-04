@@ -3,7 +3,7 @@ package com.r3.corda.lib.obligation.commands
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.r3.corda.lib.obligation.types.PaymentReference
-import com.r3.corda.lib.tokens.money.Money
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.TypeOnlyCommandData
@@ -32,10 +32,10 @@ interface ObligationCommands : CommandData {
     sealed class Novate : ObligationCommands {
 
         /** Change the face value quantity of the obligation. */
-        data class UpdateFaceAmountQuantity(val newAmount: Amount<Money>) : Novate()
+        data class UpdateFaceAmountQuantity(val newAmount: Amount<TokenType>) : Novate()
 
         /** Change the face amount token of the obligation. This involves an fx conversion. */
-        data class UpdateFaceAmountToken<OLD : Money, NEW : Money>(
+        data class UpdateFaceAmountToken<OLD : TokenType, NEW : TokenType>(
                 val oldToken: OLD,
                 val newToken: NEW,
                 val oracle: Party,
