@@ -1,7 +1,7 @@
-package com.r3.corda.finance.obligation.types
+package com.r3.corda.lib.obligation.types
 
 import com.r3.corda.lib.obligation.types.FxRate
-import com.r3.corda.lib.tokens.money.Money
+import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.SignedTransaction
 import java.time.Instant
@@ -13,6 +13,6 @@ sealed class SettlementOracleResult {
 }
 
 @CordaSerializable
-data class FxRateRequest(val baseCurrency: Money, val counterCurrency: Money, val time: Instant)
+data class FxRateRequest(val baseCurrency: TokenType, val counterCurrency: TokenType, val time: Instant)
 
 typealias FxRateResponse = FxRate

@@ -1,12 +1,15 @@
 package com.r3.corda.lib.obligation.contracts
 
 import com.r3.corda.lib.obligation.commands.ObligationCommands
-import com.r3.corda.lib.obligation.singleInput
-import com.r3.corda.lib.obligation.singleOutput
 import com.r3.corda.lib.obligation.states.Obligation
 import com.r3.corda.lib.obligation.types.PaymentStatus
-import com.r3.corda.lib.tokens.money.Money
-import net.corda.core.contracts.*
+import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.contracts.utilities.singleInput
+import com.r3.corda.lib.tokens.contracts.utilities.singleOutput
+import net.corda.core.contracts.Amount
+import net.corda.core.contracts.Contract
+import net.corda.core.contracts.ContractClassName
+import net.corda.core.contracts.requireSingleCommand
 import net.corda.core.transactions.LedgerTransaction
 import java.math.BigDecimal
 import java.time.Instant
@@ -23,7 +26,7 @@ class ObligationContract : Contract {
 
     companion object {
         @JvmStatic
-        val CONTRACT_REF: ContractClassName = "com.r3.corda.finance.obligation.contracts.ObligationContract"
+        val CONTRACT_REF: ContractClassName = ObligationContract::class.java.name
     }
 
     override fun verify(tx: LedgerTransaction) {
@@ -51,7 +54,7 @@ class ObligationContract : Contract {
     private fun handleCreate(tx: LedgerTransaction) {
         require(tx.outputs.size == 1) { "Create obligation transactions may only contain one output." }
         require(tx.inputs.isEmpty()) { "Create obligation transactions must not contain any inputs." }
-        val obligation = tx.singleOutput<Obligation<Money>>()
+        val obligation = tx.singleOutput<Obligation<TokenType>>()
         obligation.apply {
             require(faceAmount > Amount.zero(faceAmount.token)) { "Obligations must not be created with a zero face amount." }
             require(obligor != obligee) { "Obligations cannot be between the same legal identity." }
@@ -75,7 +78,7 @@ class ObligationContract : Contract {
     private fun handleCancel(tx: LedgerTransaction) {
         require(tx.inputs.size == 1) { "Cancel obligation transactions may only contain one input." }
         require(tx.outputs.isEmpty()) { "Cancel obligation transactions must not contain outputs." }
-        val obligation = tx.singleInput<Obligation<Money>>()
+        val obligation = tx.singleInput<Obligation<TokenType>>()
         val command = tx.commands.requireSingleCommand<ObligationCommands.Cancel>()
         require(command.signers.toSet() == obligation.participants.map { it.owningKey }.toSet()) {
             "Both the obligor and obligee must sign the transaction to cancel an obligation."
@@ -127,7 +130,7 @@ class ObligationContract : Contract {
         require(inputFaceAmount.token != outputFaceAmount.token) { "The face amount token must change." }
         require(command.value.fxRate != null) { "There must be an exchange rate in the novate command." }
         val newQuantity = inputFaceAmount.toDecimal() * BigDecimal.valueOf(command.value.fxRate!!.toDouble())
-        val newAmount = Amount.fromDecimal(newQuantity, command.value.newToken)
+        val newAmount = Amount.fromDecimal(newQuantity, command.value.newToken as TokenType)
         require(newAmount == outputFaceAmount) { "The token or quantity was updated correctly." }
         require(command.signers.toSet() == output.participants.map { it.owningKey}.toSet() + command.value.oracle.owningKey) {
             "Both the obligor, obligee and specified oracle must sign the transaction to update the face amount token."

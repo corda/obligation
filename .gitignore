@@ -8,6 +8,8 @@ tags
 *.log.gz
 *.orig
 
+.gradle
+
 # General build files
 **/build/*
 !docs/build/*
@@ -20,18 +22,12 @@ lib/dokka.jar
 *.iml
 
 ## Directory-based project format:
-.idea/*
+#.idea
 
 # if you remove the above rule, at least ignore the following:
 
 # Specific files to avoid churn
-.idea/gradle.xml
-.idea/kotlinc.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/workspace.xml
-.idea/inspectionProfiles
+.idea/*.xml
 .idea/copyright
 .idea/jsLibraryMappings.xml
 
@@ -47,7 +43,7 @@ lib/dokka.jar
 .idea/uiDesigner.xml
 
 # Gradle:
-.gradle/*
+.idea/libraries
 
 # Mongo Explorer plugin:
 .idea/mongoSettings.xml

@@ -1,4 +1,4 @@
-package com.r3.corda.lib.obligation
+package com.r3.corda.lib.obligation.utils
 
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.StateAndRef
@@ -11,8 +11,7 @@ import net.corda.core.node.services.vault.QueryCriteria
 
 /** Gets a linear state by unique identifier. */
 inline fun <reified T : LinearState> getLinearStateById(linearId: UniqueIdentifier, services: ServiceHub): StateAndRef<T>? {
-    val query = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
-    return services.vaultService.queryBy<T>(query).states.singleOrNull()
+    return services.vaultService.queryBy<T>(QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))).states.singleOrNull()
 }
 
 /** Lambda for resolving an [AbstractParty] to a [Party]. */
