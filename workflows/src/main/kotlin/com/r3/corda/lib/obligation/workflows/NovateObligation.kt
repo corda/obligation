@@ -22,7 +22,7 @@ import java.math.BigDecimal
 
 @InitiatingFlow
 @StartableByRPC
-class Initiator(
+class NovateObligation(
         val linearId: UniqueIdentifier,
         private val novationCommand: ObligationCommands.Novate
 ) : FlowLogic<WireTransaction>() {
@@ -137,8 +137,8 @@ class Initiator(
     }
 }
 
-@InitiatedBy(Initiator::class)
-class Responder(val otherFlow: FlowSession) : FlowLogic<WireTransaction>() {
+@InitiatedBy(NovateObligation::class)
+class NovateObligationResponder(val otherFlow: FlowSession) : FlowLogic<WireTransaction>() {
     @Suspendable
     override fun call(): WireTransaction {
         val flow = object : SignTransactionFlow(otherFlow) {

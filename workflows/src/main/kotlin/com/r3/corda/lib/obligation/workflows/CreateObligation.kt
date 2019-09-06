@@ -1,37 +1,27 @@
 package com.r3.corda.lib.obligation.workflows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.lib.ci.RequestKeyFlow
-import com.r3.corda.lib.ci.RequestKeyResponder
 import com.r3.corda.lib.obligation.commands.ObligationCommands
 import com.r3.corda.lib.obligation.contracts.ObligationContract
-import com.r3.corda.lib.obligation.states.Obligation
+import com.r3.corda.lib.obligation.utils.InitiatorRole
+import com.r3.corda.lib.obligation.utils.createObligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
 import net.corda.core.flows.*
-import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
-import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.seconds
 import net.corda.core.utilities.unwrap
-import java.security.PublicKey
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 
-@CordaSerializable
-enum class InitiatorRole {
-    OBLIGOR,
-    OBLIGEE
-}
-
 @InitiatingFlow
 @StartableByRPC
-class CreateObligationInitiator<T : TokenType>(
+class CreateObligation<T : TokenType>(
         private val amount: Amount<T>,
         private val role: InitiatorRole,
         private val counterparty: Party,
@@ -57,34 +47,19 @@ class CreateObligationInitiator<T : TokenType>(
 
     override val progressTracker: ProgressTracker = tracker()
 
-    @Suspendable
-    private fun createAnonymousObligation(ourSession: FlowSession, lenderFlow: FlowSession): Pair<Obligation<T>, PublicKey> {
-        val anonymousObligor = subFlow(RequestKeyFlow(lenderFlow))
-        val anonymousMe = subFlow(RequestKeyFlow(ourSession))
-        return createObligation(us = anonymousMe, them = anonymousObligor)
-    }
-
-    private fun createObligation(us: AbstractParty, them: AbstractParty): Pair<Obligation<T>, PublicKey> {
-        check(us != them) { "You cannot create an obligation to yourself" }
-        val obligation = when (role) {
-            InitiatorRole.OBLIGEE -> Obligation(amount, them, us, dueBy)
-            InitiatorRole.OBLIGOR -> Obligation(amount, us, them, dueBy)
-        }
-        return Pair(obligation, us.owningKey)
-    }
 
     @Suspendable
     override fun call(): WireTransaction {
         // Step 1. Initialisation.
         progressTracker.currentStep = INITIALISING
-        val ourSession = initiateFlow(ourIdentity)
-        val lenderFlow = initiateFlow(counterparty)
+        val lenderSession = initiateFlow(counterparty)
         val (obligation, signingKey) = if (anonymous) {
-            createAnonymousObligation(ourSession = ourSession, lenderFlow = lenderFlow)
+            lenderSession.send(anonymous)
+            subFlow(CreateAnonymousObligation(lenderSession, amount, role, dueBy))
         } else {
-            createObligation(us = ourIdentity, them = counterparty)
+            lenderSession.send(anonymous)
+            createObligation(us = ourIdentity, them = counterparty, amount = amount ,role = role, dueBy = dueBy)
         }
-        lenderFlow.send(anonymous)
 
         // Step 2. Check parameters.
         if (dueBy != null) {
@@ -113,24 +88,24 @@ class CreateObligationInitiator<T : TokenType>(
         progressTracker.currentStep = COLLECTING
         val stx = subFlow(CollectSignaturesFlow(
                 partiallySignedTx = ptx,
-                sessionsToCollectFrom = setOf(lenderFlow),
+                sessionsToCollectFrom = setOf(lenderSession),
                 myOptionalKeys = listOf(signingKey),
                 progressTracker = COLLECTING.childProgressTracker())
         )
 
         // Step 6. Finalise and return the transaction.
         progressTracker.currentStep = FINALISING
-        val ntx = subFlow(FinalityFlow(stx, setOf(lenderFlow), FINALISING.childProgressTracker()))
+        val ntx = subFlow(FinalityFlow(stx, setOf(lenderSession), FINALISING.childProgressTracker()))
         return ntx.tx
     }
 }
 
-@InitiatedBy(CreateObligationInitiator::class)
+@InitiatedBy(CreateObligation::class)
 class CreateObligationResponder(val otherFlow: FlowSession) : FlowLogic<WireTransaction>() {
     @Suspendable
     override fun call(): WireTransaction {
         val isAnonymous = otherFlow.receive<Boolean>().unwrap { it }
-        if (isAnonymous) subFlow(RequestKeyResponder(otherSession = otherFlow))
+        if (isAnonymous) subFlow(CreateAnonymousObligationResponder(otherFlow))
         val flow = object : SignTransactionFlow(otherFlow) {
             @Suspendable
             override fun checkTransaction(btx: SignedTransaction) {
