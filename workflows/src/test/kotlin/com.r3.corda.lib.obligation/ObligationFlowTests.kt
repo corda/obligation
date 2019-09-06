@@ -99,4 +99,7 @@ class ObligationFlowTests {
         assertEquals(aObligation, bObligation)
     }
 
+    //TODO non-anonymous
+
+    //TODO novate
 }

@@ -45,8 +45,12 @@ class ObligationContract : Contract {
         }
     }
 
-    private fun checkPropertyInvariants(input: Obligation<*>, output: Obligation<*>, properties: Set<KProperty1<Obligation<*>, Any?>>): Boolean {
-        return properties.all { property -> property.get(input) == property.get(output) }
+    private fun checkPropertyInvariants(input: Obligation<*>, output: Obligation<*>, properties: Set<KProperty1<Obligation<*>, Any?>>) {
+        return properties.forEach { property ->
+            if (property.get(input) != property.get(output))
+                throw IllegalArgumentException("Property invariant failed between input and output for field ${property.name}: " +
+                        "${property.get(input)} -> ${property.get(output)}")
+        }
     }
 
     /** CREATION. */
@@ -128,9 +132,9 @@ class ObligationContract : Contract {
         val inputFaceAmount = input.faceAmount
         val outputFaceAmount = output.faceAmount
         require(inputFaceAmount.token != outputFaceAmount.token) { "The face amount token must change." }
-        require(command.value.fxRate != null) { "There must be an exchange rate in the novate command." }
-        val newQuantity = inputFaceAmount.toDecimal() * BigDecimal.valueOf(command.value.fxRate!!.toDouble())
-        val newAmount = Amount.fromDecimal(newQuantity, command.value.newToken as TokenType)
+        val newQuantity = inputFaceAmount.toDecimal() * BigDecimal.valueOf(command.value.fxRate?.toDouble() ?:
+            throw IllegalArgumentException("There must be an exchange rate in the novate command."))
+        val newAmount = Amount.fromDecimal(newQuantity, command.value.newToken)
         require(newAmount == outputFaceAmount) { "The token or quantity was updated correctly." }
         require(command.signers.toSet() == output.participants.map { it.owningKey}.toSet() + command.value.oracle.owningKey) {
             "Both the obligor, obligee and specified oracle must sign the transaction to update the face amount token."
@@ -255,5 +259,4 @@ class ObligationContract : Contract {
         val inputPayment = input.payments.single { it.paymentReference == command.value.ref }
         require(inputPayment.status == PaymentStatus.SENT) { "Only payments with a SENT status can be updated." }
     }
-
 }

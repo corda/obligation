@@ -59,19 +59,6 @@ class CreateObligationInitiator<T : TokenType>(
 
     @Suspendable
     private fun createAnonymousObligation(ourSession: FlowSession, lenderFlow: FlowSession): Pair<Obligation<T>, PublicKey> {
-//        val sessions = listOf(initiateFlow(ourIdentity), initiateFlow(counterparty))
-//        val parties = listOf(ourIdentity, counterparty)
-//        val session = parties.map { initiateFlow(it) }
-//        val map = subFlow(AnonymisePartiesFlow(parties, session))
-//        check(map.size == 2) { "Something went wrong when generating confidential identities." }
-//        val anonymousMe = map[ourIdentity] ?: throw FlowException("Couldn't create our conf. identity.")
-//        val anonymousObligor = map[counterparty] ?: throw FlowException("Couldn't create lender's conf. identity.")
-//        return createObligation(us = anonymousMe, them = anonymousObligor)
-//        val list = linkedMapOf(
-//            ourIdentity to initiateFlow(ourIdentity),
-//            counterparty to initiateFlow(counterparty)
-//        )
-
         val anonymousObligor = subFlow(RequestKeyFlow(lenderFlow))
         val anonymousMe = subFlow(RequestKeyFlow(ourSession))
         return createObligation(us = anonymousMe, them = anonymousObligor)
@@ -93,12 +80,11 @@ class CreateObligationInitiator<T : TokenType>(
         val ourSession = initiateFlow(ourIdentity)
         val lenderFlow = initiateFlow(counterparty)
         val (obligation, signingKey) = if (anonymous) {
-            lenderFlow.send(anonymous)
             createAnonymousObligation(ourSession = ourSession, lenderFlow = lenderFlow)
         } else {
-            lenderFlow.send(anonymous)
             createObligation(us = ourIdentity, them = counterparty)
         }
+        lenderFlow.send(anonymous)
 
         // Step 2. Check parameters.
         if (dueBy != null) {
