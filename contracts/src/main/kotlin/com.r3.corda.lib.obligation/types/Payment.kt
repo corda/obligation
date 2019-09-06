@@ -8,7 +8,7 @@ import net.corda.core.serialization.CordaSerializable
 typealias PaymentReference = String
 
 @CordaSerializable
-@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include= JsonTypeInfo.As.PROPERTY, property="_type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "_type")
 interface Payment<T : TokenType> {
     /** Reference given to off-ledger payment by settlement rail. */
     val paymentReference: PaymentReference

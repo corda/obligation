@@ -1,18 +1,15 @@
 package com.r3.corda.lib.obligation.workflows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.lib.ci.RequestKey
 import com.r3.corda.lib.ci.RequestKeyFlow
 import com.r3.corda.lib.ci.RequestKeyResponder
 import com.r3.corda.lib.obligation.commands.ObligationCommands
 import com.r3.corda.lib.obligation.contracts.ObligationContract
 import com.r3.corda.lib.obligation.states.Obligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
-import com.r3.corda.lib.tokens.workflows.internal.flows.confidential.AnonymisePartiesFlow
 import net.corda.core.contracts.Amount
 import net.corda.core.flows.*
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.AnonymousParty
 import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.SignedTransaction
@@ -20,6 +17,7 @@ import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.transactions.WireTransaction
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.seconds
+import net.corda.core.utilities.unwrap
 import java.security.PublicKey
 import java.time.Instant
 import java.time.LocalDate
@@ -95,8 +93,10 @@ class CreateObligationInitiator<T : TokenType>(
         val ourSession = initiateFlow(ourIdentity)
         val lenderFlow = initiateFlow(counterparty)
         val (obligation, signingKey) = if (anonymous) {
+            lenderFlow.send(anonymous)
             createAnonymousObligation(ourSession = ourSession, lenderFlow = lenderFlow)
         } else {
+            lenderFlow.send(anonymous)
             createObligation(us = ourIdentity, them = counterparty)
         }
 
@@ -125,7 +125,6 @@ class CreateObligationInitiator<T : TokenType>(
 
         // Step 5. Get the counterparty signature.
         progressTracker.currentStep = COLLECTING
-//        val lenderFlow = initiateFlow(counterparty)
         val stx = subFlow(CollectSignaturesFlow(
                 partiallySignedTx = ptx,
                 sessionsToCollectFrom = setOf(lenderFlow),
@@ -135,7 +134,7 @@ class CreateObligationInitiator<T : TokenType>(
 
         // Step 6. Finalise and return the transaction.
         progressTracker.currentStep = FINALISING
-        val ntx = subFlow(FinalityFlow(stx, lenderFlow))
+        val ntx = subFlow(FinalityFlow(stx, setOf(lenderFlow), FINALISING.childProgressTracker()))
         return ntx.tx
     }
 }
@@ -144,16 +143,17 @@ class CreateObligationInitiator<T : TokenType>(
 class CreateObligationResponder(val otherFlow: FlowSession) : FlowLogic<WireTransaction>() {
     @Suspendable
     override fun call(): WireTransaction {
-        subFlow(RequestKeyResponder(otherSession = otherFlow))
+        val isAnonymous = otherFlow.receive<Boolean>().unwrap { it }
+        if (isAnonymous) subFlow(RequestKeyResponder(otherSession = otherFlow))
         val flow = object : SignTransactionFlow(otherFlow) {
             @Suspendable
-            override fun checkTransaction(stx: SignedTransaction) {
+            override fun checkTransaction(btx: SignedTransaction) {
                 // TODO: Do some basic checking here.
                 // Reach out to human operator when HCI is available.
             }
         }
         val stx = subFlow(flow)
         // Suspend this flow until the transaction is committed.
-        return waitForLedgerCommit(stx.id).tx
+        return subFlow(ReceiveFinalityFlow(otherFlow, stx.id)).tx
     }
 }

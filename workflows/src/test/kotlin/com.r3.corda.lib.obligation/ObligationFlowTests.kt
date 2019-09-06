@@ -5,15 +5,10 @@ import com.r3.corda.lib.obligation.workflows.CancelObligationInitiator
 import com.r3.corda.lib.obligation.workflows.CreateObligationInitiator
 import com.r3.corda.lib.obligation.workflows.InitiatorRole
 import com.r3.corda.lib.tokens.contracts.types.TokenType
-import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.contracts.utilities.singleOutput
 import com.r3.corda.lib.tokens.money.GBP
-import com.r3.corda.lib.tokens.money.XRP
-import net.corda.core.contracts.StateAndRef
-import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
 import net.corda.core.node.services.Vault
-import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.utilities.getOrThrow
 import net.corda.finance.AMOUNT

@@ -2,9 +2,9 @@ package com.r3.corda.lib.obligation.workflows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.obligation.commands.ObligationCommands
-import com.r3.corda.lib.obligation.utils.resolver
 import com.r3.corda.lib.obligation.states.Obligation
 import com.r3.corda.lib.obligation.utils.getLinearStateById
+import com.r3.corda.lib.obligation.utils.resolver
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
@@ -12,6 +12,7 @@ import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
+
 
 @InitiatingFlow
 @StartableByRPC
@@ -51,7 +52,7 @@ class CancelObligationInitiator(val linearId: UniqueIdentifier) : FlowLogic<Sign
         val signers = obligation.participants.map { it.owningKey }
         val utx = TransactionBuilder(notary = notary).apply {
             addInputState(obligationStateAndRef)
-            addCommand(ObligationCommands.Cancel(), signers)
+            addCommand(ObligationCommands.Cancel(obligation.linearId), signers)
         }
 
         // Get the counterparty and our signing key.
@@ -74,10 +75,10 @@ class CancelObligationInitiator(val linearId: UniqueIdentifier) : FlowLogic<Sign
                 myOptionalKeys = listOf(us.owningKey),
                 progressTracker = COLLECTING.childProgressTracker()
         ))
-        progressTracker.currentStep = FINALISING
-        return subFlow(FinalityFlow(stx, counterpartyFlow))
-    }
 
+        progressTracker.currentStep = FINALISING
+        return subFlow(FinalityFlow(stx, setOf(counterpartyFlow), FINALISING.childProgressTracker()))
+    }
 }
 
 @InitiatedBy(CancelObligationInitiator::class)
@@ -93,8 +94,6 @@ class CancelObligationResponder(val otherSession: FlowSession) : FlowLogic<Signe
             }
         }
         val stx = subFlow(flow)
-        // Suspend this flow until the transaction is committed.
-        return waitForLedgerCommit(stx.id)
+        return subFlow(ReceiveFinalityFlow(otherSession, stx.id))
     }
-
 }

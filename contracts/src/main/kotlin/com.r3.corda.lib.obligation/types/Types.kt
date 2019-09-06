@@ -1,6 +1,5 @@
 package com.r3.corda.lib.obligation.types
 
-import com.r3.corda.lib.obligation.types.FxRate
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.SignedTransaction
