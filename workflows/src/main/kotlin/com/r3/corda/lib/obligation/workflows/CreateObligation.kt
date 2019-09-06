@@ -1,8 +1,6 @@
 package com.r3.corda.lib.obligation.workflows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.lib.obligation.commands.ObligationCommands
-import com.r3.corda.lib.obligation.contracts.ObligationContract
 import com.r3.corda.lib.obligation.utils.InitiatorRole
 import com.r3.corda.lib.obligation.utils.createObligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
@@ -74,9 +72,9 @@ class CreateObligation<T : TokenType>(
         val notary = serviceHub.networkMapCache.notaryIdentities.firstOrNull()
                 ?: throw FlowException("No available notary.")
         val utx = TransactionBuilder(notary = notary).apply {
-            addOutputState(obligation, ObligationContract.CONTRACT_REF)
+            addOutputState(obligation, com.r3.corda.lib.obligation.contracts.ObligationContract.CONTRACT_REF)
             val signers = obligation.participants.map { it.owningKey }
-            addCommand(ObligationCommands.Create(), signers)
+            addCommand(com.r3.corda.lib.obligation.commands.ObligationCommands.Create(), signers)
             setTimeWindow(serviceHub.clock.instant(), 30.seconds)
         }
 
