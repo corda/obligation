@@ -1,17 +1,17 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-        maven {
-            url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda'
-        }
-        mavenLocal()
-    }
-
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-noarg:$kotlin_version"
-    }
-}
+//buildscript {
+//    repositories {
+//        mavenCentral()
+//        jcenter()
+//        maven {
+//            url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda'
+//        }
+//        mavenLocal()
+//    }
+//
+//    dependencies {
+//        classpath "org.jetbrains.kotlin:kotlin-noarg:$kotlin_version"
+//    }
+//}
 
 // TODO remove redundant plugin
 apply plugin: 'kotlin'
@@ -24,12 +24,15 @@ cordapp {
     targetPlatformVersion 4
     minimumPlatformVersion 4
     contract {
-        name "Obligation - Flows"
+        name "Obligation - Worklows"
         vendor "R3"
         licence "Apache 2"
         versionId 1
     }
     signing {
+        enabled false
+    }
+    sealing {
         enabled false
     }
 }
@@ -43,6 +46,13 @@ sourceSets {
     test {
         resources {
             srcDir rootProject.file("config/test")
+        }
+    }
+    integrationTest {
+        kotlin {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/integrationTest/kotlin')
         }
     }
 }
@@ -65,13 +75,6 @@ dependencies {
 
     // Tokens SDK dependencies.
     cordaCompile "$tokens_release_group:tokens-money:$tokens_release_version"
-    cordaCompile "$tokens_release_group:tokens-workflows:$tokens_release_version"
-
-    // Ripple library.
-    compile 'com.ripple:ripple-core:0.0.1-SNAPSHOT'
-
-    // Typesafe config.
-    compile 'com.typesafe:config:1.3.4'
 
     // Logging.
     testCompile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version"
@@ -81,8 +84,9 @@ dependencies {
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testCompile "junit:junit:$junit_version"
     testCompile "$tokens_release_group:tokens-money:$tokens_release_version"
+    testCompile project(":workflows")
 }
 
 jar {
-    baseName = "obligation-flows"
+    baseName = "obligation-workflows"
 }

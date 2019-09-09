@@ -1,5 +1,6 @@
 package com.r3.corda.lib.obligation.contracts
 
+import com.r3.corda.lib.obligation.commands.ObligationCommands
 import com.r3.corda.lib.obligation.states.Obligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.singleInput
@@ -24,26 +25,26 @@ class ObligationContract : Contract {
 
     companion object {
         @JvmStatic
-        val CONTRACT_REF: ContractClassName = com.r3.corda.lib.obligation.contracts.ObligationContract::class.java.name
+        val CONTRACT_REF: ContractClassName = ObligationContract::class.java.name
     }
 
     override fun verify(tx: LedgerTransaction) {
         // Obligation transactions can only contain one command.
-        val command = tx.commands.requireSingleCommand<com.r3.corda.lib.obligation.commands.ObligationCommands>()
+        val command = tx.commands.requireSingleCommand<ObligationCommands>()
         when (command.value) {
-            is com.r3.corda.lib.obligation.commands.ObligationCommands.Create -> handleCreate(tx)
-            is com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateFaceAmountQuantity -> handleNovateQuantity(tx)
-            is com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateFaceAmountToken<*, *> -> handleNovateToken(tx)
-            is com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateParty -> handleNovateParty(tx)
-            is com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateDueBy -> handleNovateDueBy(tx)
-            is com.r3.corda.lib.obligation.commands.ObligationCommands.UpdateSettlementMethod -> handleUpdateSettlementMethod(tx)
-            is com.r3.corda.lib.obligation.commands.ObligationCommands.Cancel -> handleCancel(tx)
-            is com.r3.corda.lib.obligation.commands.ObligationCommands.AddPayment -> handleAddPayment(tx)
-            is com.r3.corda.lib.obligation.commands.ObligationCommands.UpdatePayment -> handleUpdatePayment(tx)
+            is ObligationCommands.Create -> handleCreate(tx)
+            is ObligationCommands.Novate.UpdateFaceAmountQuantity -> handleNovateQuantity(tx)
+            is ObligationCommands.Novate.UpdateFaceAmountToken<*, *> -> handleNovateToken(tx)
+            is ObligationCommands.Novate.UpdateParty -> handleNovateParty(tx)
+            is ObligationCommands.Novate.UpdateDueBy -> handleNovateDueBy(tx)
+            is ObligationCommands.UpdateSettlementMethod -> handleUpdateSettlementMethod(tx)
+            is ObligationCommands.Cancel -> handleCancel(tx)
+            is ObligationCommands.AddPayment -> handleAddPayment(tx)
+            is ObligationCommands.UpdatePayment -> handleUpdatePayment(tx)
         }
     }
 
-    private fun checkPropertyInvariants(input: com.r3.corda.lib.obligation.states.Obligation<*>, output: com.r3.corda.lib.obligation.states.Obligation<*>, properties: Set<KProperty1<com.r3.corda.lib.obligation.states.Obligation<*>, Any?>>) {
+    private fun checkPropertyInvariants(input: Obligation<*>, output: Obligation<*>, properties: Set<KProperty1<Obligation<*>, Any?>>) {
         return properties.forEach { property ->
             if (property.get(input) != property.get(output))
                 throw IllegalArgumentException("Property invariant failed between input and output for field ${property.name}: " +
@@ -56,7 +57,7 @@ class ObligationContract : Contract {
     private fun handleCreate(tx: LedgerTransaction) {
         require(tx.outputs.size == 1) { "Create obligation transactions may only contain one output." }
         require(tx.inputs.isEmpty()) { "Create obligation transactions must not contain any inputs." }
-        val obligation = tx.singleOutput<com.r3.corda.lib.obligation.states.Obligation<TokenType>>()
+        val obligation = tx.singleOutput<Obligation<TokenType>>()
         obligation.apply {
             require(faceAmount > Amount.zero(faceAmount.token)) { "Obligations must not be created with a zero face amount." }
             require(obligor != obligee) { "Obligations cannot be between the same legal identity." }
@@ -66,7 +67,7 @@ class ObligationContract : Contract {
             }
             require(payments.isEmpty()) { "Obligations cannot be created with any initial payments." }
             require(!inDefault) { "Obligations cannot be in default when they are created." }
-            val command = tx.commands.requireSingleCommand<com.r3.corda.lib.obligation.commands.ObligationCommands.Create>()
+            val command = tx.commands.requireSingleCommand<ObligationCommands.Create>()
             require(command.signers.toSet() == obligation.participants.map { it.owningKey}.toSet()) {
                 "Both the obligor and obligee must sign the transaction to create an obligation."
             }
@@ -80,8 +81,8 @@ class ObligationContract : Contract {
     private fun handleCancel(tx: LedgerTransaction) {
         require(tx.inputs.size == 1) { "Cancel obligation transactions may only contain one input." }
         require(tx.outputs.isEmpty()) { "Cancel obligation transactions must not contain outputs." }
-        val obligation = tx.singleInput<com.r3.corda.lib.obligation.states.Obligation<TokenType>>()
-        val command = tx.commands.requireSingleCommand<com.r3.corda.lib.obligation.commands.ObligationCommands.Cancel>()
+        val obligation = tx.singleInput<Obligation<TokenType>>()
+        val command = tx.commands.requireSingleCommand<ObligationCommands.Cancel>()
         require(command.signers.toSet() == obligation.participants.map { it.owningKey }.toSet()) {
             "Both the obligor and obligee must sign the transaction to cancel an obligation."
         }
@@ -89,24 +90,24 @@ class ObligationContract : Contract {
 
     /** NOVATION. */
 
-    private fun handleNovateAmount(input: com.r3.corda.lib.obligation.states.Obligation<*>, output: com.r3.corda.lib.obligation.states.Obligation<*>) {
+    private fun handleNovateAmount(input: Obligation<*>, output: Obligation<*>) {
         // Stuff that shouldn't change.
         val invariantProperties = setOf(
-                com.r3.corda.lib.obligation.states.Obligation<*>::linearId,
-                com.r3.corda.lib.obligation.states.Obligation<*>::obligor,
-                com.r3.corda.lib.obligation.states.Obligation<*>::obligee,
-                com.r3.corda.lib.obligation.states.Obligation<*>::settlementMethod,
-                com.r3.corda.lib.obligation.states.Obligation<*>::dueBy,
-                com.r3.corda.lib.obligation.states.Obligation<*>::createdAt,
-                com.r3.corda.lib.obligation.states.Obligation<*>::payments
+                Obligation<*>::linearId,
+                Obligation<*>::obligor,
+                Obligation<*>::obligee,
+                Obligation<*>::settlementMethod,
+                Obligation<*>::dueBy,
+                Obligation<*>::createdAt,
+                Obligation<*>::payments
         )
         checkPropertyInvariants(input, output, invariantProperties)
     }
 
     private fun handleNovateQuantity(tx: LedgerTransaction) {
-        val input = tx.singleInput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val output = tx.singleOutput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val command = tx.commands.requireSingleCommand<com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateFaceAmountQuantity>()
+        val input = tx.singleInput<Obligation<*>>()
+        val output = tx.singleOutput<Obligation<*>>()
+        val command = tx.commands.requireSingleCommand<ObligationCommands.Novate.UpdateFaceAmountQuantity>()
         handleNovateAmount(input, output)
         val inputFaceAmount = input.faceAmount
         val outputFaceAmount = output.faceAmount
@@ -123,9 +124,9 @@ class ObligationContract : Contract {
     }
 
     private fun handleNovateToken(tx: LedgerTransaction) {
-        val input = tx.singleInput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val output = tx.singleOutput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val command = tx.commands.requireSingleCommand<com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateFaceAmountToken<*, *>>()
+        val input = tx.singleInput<Obligation<*>>()
+        val output = tx.singleOutput<Obligation<*>>()
+        val command = tx.commands.requireSingleCommand<ObligationCommands.Novate.UpdateFaceAmountToken<*, *>>()
         handleNovateAmount(input, output)
         val inputFaceAmount = input.faceAmount
         val outputFaceAmount = output.faceAmount
@@ -140,25 +141,25 @@ class ObligationContract : Contract {
     }
 
     private fun handleNovateParty(tx: LedgerTransaction) {
-        val input = tx.singleInput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val output = tx.singleOutput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val command = tx.commands.requireSingleCommand<com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateParty>()
+        val input = tx.singleInput<Obligation<*>>()
+        val output = tx.singleOutput<Obligation<*>>()
+        val command = tx.commands.requireSingleCommand<ObligationCommands.Novate.UpdateParty>()
         // Stuff that explicitly shouldn't change.
         val invariantProperties = setOf(
-                com.r3.corda.lib.obligation.states.Obligation<*>::faceAmount,
-                com.r3.corda.lib.obligation.states.Obligation<*>::linearId,
-                com.r3.corda.lib.obligation.states.Obligation<*>::dueBy,
-                com.r3.corda.lib.obligation.states.Obligation<*>::createdAt,
-                com.r3.corda.lib.obligation.states.Obligation<*>::payments,
-                com.r3.corda.lib.obligation.states.Obligation<*>::settlementMethod
+                Obligation<*>::faceAmount,
+                Obligation<*>::linearId,
+                Obligation<*>::dueBy,
+                Obligation<*>::createdAt,
+                Obligation<*>::payments,
+                Obligation<*>::settlementMethod
         )
         checkPropertyInvariants(input, output, invariantProperties)
         if (input.obligor == command.value.oldParty) {
             require(output.obligor == command.value.newParty) { "New party not updated correctly." }
-            checkPropertyInvariants(input, output, setOf(com.r3.corda.lib.obligation.states.Obligation<*>::obligee))
+            checkPropertyInvariants(input, output, setOf(Obligation<*>::obligee))
         } else {
             require(output.obligee == command.value.newParty) { "New party not updated correctly." }
-            checkPropertyInvariants(input, output, setOf(com.r3.corda.lib.obligation.states.Obligation<*>::obligor))
+            checkPropertyInvariants(input, output, setOf(Obligation<*>::obligor))
         }
         // Need all three parties to sign.
         val allParties = output.participants.map { it.owningKey } + input.participants.map { it.owningKey }
@@ -168,18 +169,18 @@ class ObligationContract : Contract {
     }
 
     private fun handleNovateDueBy(tx: LedgerTransaction) {
-        val input = tx.singleInput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val output = tx.singleOutput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val command = tx.commands.requireSingleCommand<com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateDueBy>()
+        val input = tx.singleInput<Obligation<*>>()
+        val output = tx.singleOutput<Obligation<*>>()
+        val command = tx.commands.requireSingleCommand<ObligationCommands.Novate.UpdateDueBy>()
         // Stuff that explicitly shouldn't change.
         val invariantProperties = setOf(
-                com.r3.corda.lib.obligation.states.Obligation<*>::faceAmount,
-                com.r3.corda.lib.obligation.states.Obligation<*>::linearId,
-                com.r3.corda.lib.obligation.states.Obligation<*>::obligor,
-                com.r3.corda.lib.obligation.states.Obligation<*>::obligee,
-                com.r3.corda.lib.obligation.states.Obligation<*>::createdAt,
-                com.r3.corda.lib.obligation.states.Obligation<*>::payments,
-                com.r3.corda.lib.obligation.states.Obligation<*>::settlementMethod
+                Obligation<*>::faceAmount,
+                Obligation<*>::linearId,
+                Obligation<*>::obligor,
+                Obligation<*>::obligee,
+                Obligation<*>::createdAt,
+                Obligation<*>::payments,
+                Obligation<*>::settlementMethod
         )
         checkPropertyInvariants(input, output, invariantProperties)
         require(input.dueBy != output.dueBy) { "The due by date must change." }
@@ -194,17 +195,17 @@ class ObligationContract : Contract {
     /** SETTLEMENT. */
 
     private fun handleUpdateSettlementMethod(tx: LedgerTransaction) {
-        val input = tx.singleInput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val output = tx.singleOutput<com.r3.corda.lib.obligation.states.Obligation<*>>()
+        val input = tx.singleInput<Obligation<*>>()
+        val output = tx.singleOutput<Obligation<*>>()
         // Stuff that explicitly shouldn't change.
         val invariantProperties = setOf(
-                com.r3.corda.lib.obligation.states.Obligation<*>::faceAmount,
-                com.r3.corda.lib.obligation.states.Obligation<*>::linearId,
-                com.r3.corda.lib.obligation.states.Obligation<*>::obligor,
-                com.r3.corda.lib.obligation.states.Obligation<*>::obligee,
-                com.r3.corda.lib.obligation.states.Obligation<*>::dueBy,
-                com.r3.corda.lib.obligation.states.Obligation<*>::createdAt,
-                com.r3.corda.lib.obligation.states.Obligation<*>::payments
+                Obligation<*>::faceAmount,
+                Obligation<*>::linearId,
+                Obligation<*>::obligor,
+                Obligation<*>::obligee,
+                Obligation<*>::dueBy,
+                Obligation<*>::createdAt,
+                Obligation<*>::payments
         )
         checkPropertyInvariants(input, output, invariantProperties)
         require(output.settlementMethod != null) {
@@ -217,18 +218,18 @@ class ObligationContract : Contract {
     }
 
     private fun handleAddPayment(tx: LedgerTransaction) {
-        val input = tx.singleInput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val output = tx.singleOutput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val command = tx.commands.requireSingleCommand<com.r3.corda.lib.obligation.commands.ObligationCommands.AddPayment>()
+        val input = tx.singleInput<Obligation<*>>()
+        val output = tx.singleOutput<Obligation<*>>()
+        val command = tx.commands.requireSingleCommand<ObligationCommands.AddPayment>()
         // Stuff that explicitly shouldn't change.
         val invariantProperties = setOf(
-                com.r3.corda.lib.obligation.states.Obligation<*>::faceAmount,
-                com.r3.corda.lib.obligation.states.Obligation<*>::linearId,
-                com.r3.corda.lib.obligation.states.Obligation<*>::obligor,
-                com.r3.corda.lib.obligation.states.Obligation<*>::obligee,
-                com.r3.corda.lib.obligation.states.Obligation<*>::dueBy,
-                com.r3.corda.lib.obligation.states.Obligation<*>::createdAt,
-                com.r3.corda.lib.obligation.states.Obligation<*>::settlementMethod
+                Obligation<*>::faceAmount,
+                Obligation<*>::linearId,
+                Obligation<*>::obligor,
+                Obligation<*>::obligee,
+                Obligation<*>::dueBy,
+                Obligation<*>::createdAt,
+                Obligation<*>::settlementMethod
         )
         checkPropertyInvariants(input, output, invariantProperties)
         require(input.settlementMethod != null) {
@@ -240,18 +241,18 @@ class ObligationContract : Contract {
     }
 
     private fun handleUpdatePayment(tx: LedgerTransaction) {
-        val input = tx.singleInput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val output = tx.singleOutput<com.r3.corda.lib.obligation.states.Obligation<*>>()
-        val command = tx.commands.requireSingleCommand<com.r3.corda.lib.obligation.commands.ObligationCommands.UpdatePayment>()
+        val input = tx.singleInput<Obligation<*>>()
+        val output = tx.singleOutput<Obligation<*>>()
+        val command = tx.commands.requireSingleCommand<ObligationCommands.UpdatePayment>()
         // Stuff that explicitly shouldn't change.
         val invariantProperties = setOf(
-                com.r3.corda.lib.obligation.states.Obligation<*>::faceAmount,
-                com.r3.corda.lib.obligation.states.Obligation<*>::linearId,
-                com.r3.corda.lib.obligation.states.Obligation<*>::obligor,
-                com.r3.corda.lib.obligation.states.Obligation<*>::obligee,
-                com.r3.corda.lib.obligation.states.Obligation<*>::dueBy,
-                com.r3.corda.lib.obligation.states.Obligation<*>::createdAt,
-                com.r3.corda.lib.obligation.states.Obligation<*>::settlementMethod
+                Obligation<*>::faceAmount,
+                Obligation<*>::linearId,
+                Obligation<*>::obligor,
+                Obligation<*>::obligee,
+                Obligation<*>::dueBy,
+                Obligation<*>::createdAt,
+                Obligation<*>::settlementMethod
         )
         checkPropertyInvariants(input, output, invariantProperties)
         val inputPayment = input.payments.single { it.paymentReference == command.value.ref }

@@ -1,5 +1,7 @@
 package com.r3.corda.lib.obligation.states
 
+import com.r3.corda.lib.obligation.contracts.ObligationContract
+import com.r3.corda.lib.obligation.types.SettlementMethod
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.BelongsToContract
@@ -31,7 +33,7 @@ import java.time.Instant
  * 8. Obligations are considered in default if they are not fully paid by the dueDate, if one is specified.
  *
  */
-@BelongsToContract(com.r3.corda.lib.obligation.contracts.ObligationContract::class)
+@BelongsToContract(ObligationContract::class)
 data class Obligation<T : TokenType>(
         /** Obligations are always denominated in some token type as we need a reference for FX purposes. */
         val faceAmount: Amount<T>,
@@ -44,7 +46,7 @@ data class Obligation<T : TokenType>(
         /** The time when the obligation was created. */
         val createdAt: Instant = Instant.now(),
         /** Settlement methods the obligee will accept: On ledger, off ledger (crypto, swift, PISP, paypal, etc.). */
-        val settlementMethod: com.r3.corda.lib.obligation.types.SettlementMethod? = null,
+        val settlementMethod: SettlementMethod? = null,
         /** The obligation can be paid in parts. This lists all payments in respect of this obligation */
         val payments: List<com.r3.corda.lib.obligation.types.Payment<T>> = emptyList(),
         /** Unique identifier for the obligation. */
@@ -67,19 +69,19 @@ data class Obligation<T : TokenType>(
     val inDefault: Boolean get() = dueBy?.let { Instant.now() > dueBy } ?: false
 
     /** Returns the current state of the obligation. */
-    val settlementStatus: com.r3.corda.lib.obligation.states.Obligation.SettlementStatus
+    val settlementStatus: SettlementStatus
         get() {
             return when {
-                payments.isEmpty() -> com.r3.corda.lib.obligation.states.Obligation.SettlementStatus.UNSETTLED
-                payments.isNotEmpty() && amountPaid < faceAmount -> com.r3.corda.lib.obligation.states.Obligation.SettlementStatus.PARTIALLY_SETTLED
-                payments.isNotEmpty() && amountPaid == faceAmount -> com.r3.corda.lib.obligation.states.Obligation.SettlementStatus.SETTLED
+                payments.isEmpty() -> SettlementStatus.UNSETTLED
+                payments.isNotEmpty() && amountPaid < faceAmount -> SettlementStatus.PARTIALLY_SETTLED
+                payments.isNotEmpty() && amountPaid == faceAmount -> SettlementStatus.SETTLED
                 else -> throw IllegalStateException("Shouldn't reach here.")
             }
         }
 
     /** For adding or changing the settlement method. */
-    fun withSettlementMethod(settlementMethod: com.r3.corda.lib.obligation.types.SettlementMethod?): com.r3.corda.lib.obligation.states.Obligation<T> {
-        return if (settlementStatus != com.r3.corda.lib.obligation.states.Obligation.SettlementStatus.UNSETTLED) {
+    fun withSettlementMethod(settlementMethod: SettlementMethod?): Obligation<T> {
+        return if (settlementStatus != SettlementStatus.UNSETTLED) {
             throw IllegalStateException("Cannot change settlement method after a payment has been made.")
         } else copy(settlementMethod = settlementMethod)
     }
@@ -88,7 +90,7 @@ data class Obligation<T : TokenType>(
     fun withDueByDate(dueBy: Instant) = copy(dueBy = dueBy)
 
     /** Update the due by date. */
-    fun withNewCounterparty(oldParty: AbstractParty, newParty: AbstractParty): com.r3.corda.lib.obligation.states.Obligation<T> {
+    fun withNewCounterparty(oldParty: AbstractParty, newParty: AbstractParty): Obligation<T> {
         return when {
             obligee == oldParty -> copy(obligee = newParty)
             obligor == oldParty -> copy(obligor = newParty)
@@ -96,23 +98,23 @@ data class Obligation<T : TokenType>(
         }
     }
 
-    fun <U : TokenType> withNewFaceValueToken(newAmount: Amount<U>): com.r3.corda.lib.obligation.states.Obligation<U> {
+    fun <U : TokenType> withNewFaceValueToken(newAmount: Amount<U>): Obligation<U> {
         return if (payments.isEmpty()) {
-            com.r3.corda.lib.obligation.states.Obligation(newAmount, obligor, obligee, dueBy, createdAt, settlementMethod, emptyList(), linearId)
+            Obligation(newAmount, obligor, obligee, dueBy, createdAt, settlementMethod, emptyList(), linearId)
         } else {
             throw IllegalStateException("The faceValue token type cannot be updated after payments have been made.")
         }
     }
 
     /** Update the amount, keeping the token type the same. */
-    fun withNewFaceValueQuantity(newAmount: Amount<T>): com.r3.corda.lib.obligation.states.Obligation<T> {
+    fun withNewFaceValueQuantity(newAmount: Amount<T>): Obligation<T> {
         return if (newAmount < amountPaid) {
             throw IllegalStateException("Can't reduce the faceAmount to less than the current amountPaid.")
         } else copy(faceAmount = newAmount)
     }
 
     /** Add a new payment to the payments list. */
-    fun withPayment(payment: com.r3.corda.lib.obligation.types.Payment<T>): com.r3.corda.lib.obligation.states.Obligation<T> {
+    fun withPayment(payment: com.r3.corda.lib.obligation.types.Payment<T>): Obligation<T> {
         val newAmountPaid = amountPaid + payment.amount
         return if (newAmountPaid > faceAmount) {
             throw IllegalStateException("You cannot over pay an obligation.")
@@ -126,7 +128,7 @@ data class Obligation<T : TokenType>(
     }
 
     /** Returns the obligation with well known identities. */
-    fun withWellKnownIdentities(resolver: (AbstractParty) -> Party): com.r3.corda.lib.obligation.states.Obligation<T> {
+    fun withWellKnownIdentities(resolver: (AbstractParty) -> Party): Obligation<T> {
         return copy(obligee = resolveParty(resolver, obligee), obligor = resolveParty(resolver, obligor))
     }
 

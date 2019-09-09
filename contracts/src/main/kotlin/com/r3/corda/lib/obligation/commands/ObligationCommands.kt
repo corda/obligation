@@ -15,7 +15,7 @@ import java.time.Instant
 interface ObligationCommands : CommandData {
 
     /** Create a new obligation. */
-    class Create : com.r3.corda.lib.obligation.commands.ObligationCommands, TypeOnlyCommandData()
+    class Create : ObligationCommands, TypeOnlyCommandData()
 
     /** Change the details of an obligation. */
     @JsonTypeInfo(
@@ -24,15 +24,15 @@ interface ObligationCommands : CommandData {
             property = "type"
     )
     @JsonSubTypes(
-            JsonSubTypes.Type(value = com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateFaceAmountQuantity::class, name = "quantity"),
-            JsonSubTypes.Type(value = com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateFaceAmountToken::class, name = "token"),
-            JsonSubTypes.Type(value = com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateDueBy::class, name = "dueBy"),
-            JsonSubTypes.Type(value = com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateParty::class, name = "party")
+            JsonSubTypes.Type(value = Novate.UpdateFaceAmountQuantity::class, name = "quantity"),
+            JsonSubTypes.Type(value = Novate.UpdateFaceAmountToken::class, name = "token"),
+            JsonSubTypes.Type(value = Novate.UpdateDueBy::class, name = "dueBy"),
+            JsonSubTypes.Type(value = Novate.UpdateParty::class, name = "party")
     )
-    sealed class Novate : com.r3.corda.lib.obligation.commands.ObligationCommands {
+    sealed class Novate : ObligationCommands {
 
         /** Change the face value quantity of the obligation. */
-        data class UpdateFaceAmountQuantity(val newAmount: Amount<TokenType>) : com.r3.corda.lib.obligation.commands.ObligationCommands.Novate()
+        data class UpdateFaceAmountQuantity(val newAmount: Amount<TokenType>) : ObligationCommands.Novate()
 
         /** Change the face amount token of the obligation. This involves an fx conversion. */
         data class UpdateFaceAmountToken<OLD : TokenType, NEW : TokenType>(
@@ -40,24 +40,24 @@ interface ObligationCommands : CommandData {
                 val newToken: NEW,
                 val oracle: Party,
                 val fxRate: Number? = null
-        ) : com.r3.corda.lib.obligation.commands.ObligationCommands.Novate()
+        ) : ObligationCommands.Novate()
 
         /** Change the due by date. */
-        data class UpdateDueBy(val newDueBy: Instant) : com.r3.corda.lib.obligation.commands.ObligationCommands.Novate()
+        data class UpdateDueBy(val newDueBy: Instant) : ObligationCommands.Novate()
 
         /** Change one of the parties. */
-        data class UpdateParty(val oldParty: AbstractParty, val newParty: AbstractParty) : com.r3.corda.lib.obligation.commands.ObligationCommands.Novate()
+        data class UpdateParty(val oldParty: AbstractParty, val newParty: AbstractParty) : ObligationCommands.Novate()
     }
 
     /** Add or update the settlement method. */
-    class UpdateSettlementMethod : com.r3.corda.lib.obligation.commands.ObligationCommands, TypeOnlyCommandData()
+    class UpdateSettlementMethod : ObligationCommands, TypeOnlyCommandData()
 
     /** Record that a payment was made in respect of an obligation. */
-    data class AddPayment(val ref: com.r3.corda.lib.obligation.types.PaymentReference) : com.r3.corda.lib.obligation.commands.ObligationCommands
+    data class AddPayment(val ref: com.r3.corda.lib.obligation.types.PaymentReference) : ObligationCommands
 
     /** Update the settlement status of a payment. */
-    data class UpdatePayment(val ref: com.r3.corda.lib.obligation.types.PaymentReference) : com.r3.corda.lib.obligation.commands.ObligationCommands
+    data class UpdatePayment(val ref: com.r3.corda.lib.obligation.types.PaymentReference) : ObligationCommands
 
     /** Cancel the obligation - involves exiting the obligation state from the ledger. */
-    data class Cancel(val id: UniqueIdentifier) : com.r3.corda.lib.obligation.commands.ObligationCommands, TypeOnlyCommandData()
+    data class Cancel(val id: UniqueIdentifier) : ObligationCommands, TypeOnlyCommandData()
 }

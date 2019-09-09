@@ -1,8 +1,8 @@
 package com.r3.corda.lib.obligation.workflows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.lib.obligation.utils.getLinearStateById
-import com.r3.corda.lib.obligation.utils.resolver
+import com.r3.corda.lib.obligation.commands.ObligationCommands
+import com.r3.corda.lib.obligation.states.Obligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*
@@ -38,7 +38,7 @@ class CancelObligationInitiator(val linearId: UniqueIdentifier) : FlowLogic<Sign
     override fun call(): SignedTransaction {
         // Get the obligation from our vault.
         progressTracker.currentStep = INITIALISING
-        val obligationStateAndRef = getLinearStateById<com.r3.corda.lib.obligation.states.Obligation<TokenType>>(linearId, serviceHub)
+        val obligationStateAndRef = getLinearStateById<Obligation<TokenType>>(linearId, serviceHub)
                 ?: throw IllegalArgumentException("LinearId not recognised.")
         val obligation = obligationStateAndRef.state.data
         val obligationWithWellKnownParties = obligation.withWellKnownIdentities(resolver)
@@ -50,7 +50,7 @@ class CancelObligationInitiator(val linearId: UniqueIdentifier) : FlowLogic<Sign
         val signers = obligation.participants.map { it.owningKey }
         val utx = TransactionBuilder(notary = notary).apply {
             addInputState(obligationStateAndRef)
-            addCommand(com.r3.corda.lib.obligation.commands.ObligationCommands.Cancel(obligation.linearId), signers)
+            addCommand(ObligationCommands.Cancel(obligation.linearId), signers)
         }
 
         // Get the counterparty and our signing key.

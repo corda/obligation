@@ -1,6 +1,22 @@
 apply plugin: 'kotlin'
 apply plugin: 'net.corda.plugins.cordapp'
 
+cordapp {
+    targetPlatformVersion 4
+    minimumPlatformVersion 4
+    contract {
+        name "Obligation - Oracle"
+        vendor "R3"
+        licence "Apache 2"
+        versionId 1
+    }
+    signing {
+        enabled false
+    }
+    sealing {
+        enabled false
+    }
+}
 dependencies {
     // Kotlin.
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -25,22 +41,6 @@ dependencies {
     cordaCompile "$tokens_release_group:tokens-money:$tokens_release_version"
 }
 
-cordapp {
-    targetPlatformVersion 4
-    minimumPlatformVersion 4
-    contract {
-        name "Obligation - Oracle"
-        vendor "R3"
-        licence "Apache 2"
-        versionId 1
-    }
-    signing {
-        enabled false
-    }
-    sealing {
-        enabled false
-    }
-}
 
 configurations {
     testOutput
@@ -48,4 +48,8 @@ configurations {
 
 dependencies {
     testOutput sourceSets.test.output
+}
+
+jar {
+    baseName = "obligation-oracle"
 }

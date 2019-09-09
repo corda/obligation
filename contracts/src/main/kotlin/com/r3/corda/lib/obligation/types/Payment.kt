@@ -11,11 +11,11 @@ typealias PaymentReference = String
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "_type")
 interface Payment<T : TokenType> {
     /** Reference given to off-ledger payment by settlement rail. */
-    val paymentReference: com.r3.corda.lib.obligation.types.PaymentReference
+    val paymentReference: PaymentReference
     /** Amount that was paid in the required token type. */
     val amount: Amount<T>
     /** SENT, ACCEPTED or FAILED. */
-    var status: com.r3.corda.lib.obligation.types.PaymentStatus
+    var status: PaymentStatus
 }
 
 @CordaSerializable
