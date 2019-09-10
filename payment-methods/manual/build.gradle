@@ -35,7 +35,7 @@ dependencies {
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.5"
 
     // Project dependencies.
-    cordaCompile project(":workflows")
+    cordaCompile project(":contracts")
 
     // Typesafe config.
     compile 'com.typesafe:config:1.3.4'

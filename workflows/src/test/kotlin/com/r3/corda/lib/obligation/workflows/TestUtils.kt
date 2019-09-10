@@ -1,4 +1,4 @@
-package com.r3.corda.lib.obligation.flows
+package com.r3.corda.lib.obligation.workflows
 
 import com.r3.corda.lib.obligation.states.Obligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType

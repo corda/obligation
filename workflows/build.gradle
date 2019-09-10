@@ -68,9 +68,10 @@ dependencies {
 
     //contracts and states dependency.
     cordaCompile project(":contracts")
+    cordaCompile project(":oracle")
     cordaCompile project(":workflows-api")
 
-    // Confidential Identities flows.
+    // Confidential Identities workflows.
     cordaCompile "$confidential_id_release_group:ci-workflows:$confidential_id_release_version"
 
     // Tokens SDK dependencies.

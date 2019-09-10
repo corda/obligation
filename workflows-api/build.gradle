@@ -64,5 +64,5 @@ dependencies {
 }
 
 jar {
-    baseName = "obligation-flows-api"
+    baseName = "obligation-workflows-api"
 }

@@ -1,4 +1,4 @@
-//package com.r3.corda.finance.obligation.oracle.flows
+//package com.r3.corda.finance.obligation.oracle.workflows
 //
 //import co.paralleluniverse.fibers.Suspendable
 //import com.r3.corda.finance.obligation.oracle.services.XrpOracleService
@@ -8,7 +8,7 @@
 //import com.r3.corda.finance.swift.types.SWIFTPaymentStatusType
 //import com.r3.corda.finance.swift.types.SwiftPayment
 //import com.r3.corda.finance.swift.types.SwiftSettlement
-//import com.r3.corda.lib.obligation.flows.api.AbstractSendToSettlementOracle
+//import com.r3.corda.lib.obligation.workflows.api.AbstractSendToSettlementOracle
 //import com.r3.corda.lib.obligation.commands.ObligationCommands
 //import com.r3.corda.lib.obligation.contracts.ObligationContract
 //import com.r3.corda.lib.obligation.states.Obligation
@@ -16,7 +16,7 @@
 //import com.r3.corda.lib.obligation.types.SettlementOracleResult
 //import com.r3.corda.lib.tokens.contracts.types.TokenType
 //import net.corda.core.contracts.StateAndRef
-//import net.corda.core.flows.*
+//import net.corda.core.workflows.*
 //import net.corda.core.transactions.SignedTransaction
 //import net.corda.core.transactions.TransactionBuilder
 //import net.corda.core.utilities.ProgressTracker

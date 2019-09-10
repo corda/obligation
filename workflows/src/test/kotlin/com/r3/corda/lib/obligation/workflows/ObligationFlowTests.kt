@@ -1,11 +1,7 @@
-package com.r3.corda.lib.obligation.flows
+package com.r3.corda.lib.obligation.workflows
 
 import com.r3.corda.lib.obligation.commands.ObligationCommands
 import com.r3.corda.lib.obligation.states.Obligation
-import com.r3.corda.lib.obligation.workflows.CancelObligationInitiator
-import com.r3.corda.lib.obligation.workflows.CreateObligation
-import com.r3.corda.lib.obligation.workflows.InitiatorRole
-import com.r3.corda.lib.obligation.workflows.NovateObligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.singleOutput
 import com.r3.corda.lib.tokens.money.GBP
@@ -55,6 +51,9 @@ class ObligationFlowTests {
                                 TestCordapp.findCordapp("com.r3.corda.lib.tokens.money"),
                                 TestCordapp.findCordapp("com.r3.corda.lib.ci"),
                                 TestCordapp.findCordapp("com.r3.corda.lib.obligation.contracts"),
+                                TestCordapp.findCordapp("com.r3.corda.lib.obligation.oracle.flows"),
+                                TestCordapp.findCordapp( "com.r3.corda.lib.obligation.api"),
+                                TestCordapp.findCordapp("com.r3.corda.lib.obligation.flows"),
                                 TestCordapp.findCordapp("com.r3.corda.lib.obligation.workflows")
                         ),
                         threadPerNode = true

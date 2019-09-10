@@ -2,6 +2,7 @@ package com.r3.corda.lib.obligation.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.obligation.api.AbstractGetFxOracleSignature
+import com.r3.corda.lib.obligation.commands.ObligationCommands
 import net.corda.core.contracts.Command
 import net.corda.core.crypto.TransactionSignature
 import net.corda.core.identity.Party
@@ -16,7 +17,7 @@ class GetFxRateOracleSignature(private val ptx: SignedTransaction, val oracle: P
         val ftx = ptx.buildFilteredTransaction(Predicate {
             when (it) {
                 is Command<*> ->
-                    oracle.owningKey in it.signers && it.value is com.r3.corda.lib.obligation.commands.ObligationCommands.Novate.UpdateFaceAmountToken<*, *>
+                    oracle.owningKey in it.signers && it.value is ObligationCommands.Novate.UpdateFaceAmountToken<*, *>
                 else -> false
             }
         })

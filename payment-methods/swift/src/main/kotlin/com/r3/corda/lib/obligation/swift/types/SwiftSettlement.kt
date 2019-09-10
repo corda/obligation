@@ -1,6 +1,6 @@
 //package com.r3.corda.finance.swift.types
 //
-//import com.r3.corda.finance.swift.flows.MakeSWIFTPayment
+//import com.r3.corda.finance.swift.workflows.MakeSWIFTPayment
 //import net.corda.core.identity.Party
 //
 ///**
