@@ -16,9 +16,6 @@ buildscript {
 // TODO remove redundant plugin
 apply plugin: 'kotlin'
 apply plugin: 'net.corda.plugins.cordapp'
-apply plugin: 'net.corda.plugins.cordformation'
-apply plugin: 'net.corda.plugins.quasar-utils'
-apply plugin: 'kotlin-jpa'
 
 cordapp {
     targetPlatformVersion 4

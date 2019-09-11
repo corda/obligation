@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.ripple.core.coretypes.AccountID
 import com.ripple.core.coretypes.Amount
-import net.corda.core.contracts.Amount
 
 data class RequestObject(val method: String, val params: List<Any>)
 

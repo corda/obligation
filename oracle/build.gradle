@@ -18,15 +18,6 @@ cordapp {
     }
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        languageVersion = "1.2"
-        apiVersion = "1.2"
-        jvmTarget = "1.8"
-        javaParameters = true   // Useful for reflection.
-    }
-}
-
 dependencies {
     // Kotlin.
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
