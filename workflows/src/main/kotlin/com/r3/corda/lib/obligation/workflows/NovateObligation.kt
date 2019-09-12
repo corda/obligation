@@ -2,8 +2,7 @@ package com.r3.corda.lib.obligation.workflows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.obligation.commands.ObligationCommands
-import com.r3.corda.lib.obligation.flows.GetFxRate
-import com.r3.corda.lib.obligation.flows.GetFxRateOracleSignature
+import com.r3.corda.lib.obligation.contracts.ObligationContract
 import com.r3.corda.lib.obligation.states.Obligation
 import com.r3.corda.lib.obligation.types.FxRateRequest
 import com.r3.corda.lib.obligation.types.FxRateResponse
@@ -93,7 +92,7 @@ class NovateObligation(
         val signers = novatedObligation.participants.map { it.owningKey }
         val utx = TransactionBuilder(notary = notary).apply {
             addInputState(obligationStateAndRef)
-            addOutputState(novatedObligation, com.r3.corda.lib.obligation.contracts.ObligationContract.CONTRACT_REF)
+            addOutputState(novatedObligation, ObligationContract.CONTRACT_REF)
             // Add the oracle key if required.
             if (novationCommand is ObligationCommands.Novate.UpdateFaceAmountToken<*, *>) {
                 val oracleKey = novationCommand.oracle.owningKey

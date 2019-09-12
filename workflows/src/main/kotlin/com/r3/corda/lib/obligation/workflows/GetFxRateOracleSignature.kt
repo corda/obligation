@@ -1,4 +1,4 @@
-package com.r3.corda.lib.obligation.flows
+package com.r3.corda.lib.obligation.workflows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.obligation.api.AbstractGetFxOracleSignature

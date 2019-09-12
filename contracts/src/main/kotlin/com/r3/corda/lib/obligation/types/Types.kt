@@ -3,15 +3,13 @@ package com.r3.corda.lib.obligation.types
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.serialization.CordaSerializable
 import net.corda.core.transactions.SignedTransaction
+import java.math.BigDecimal
 import java.time.Instant
 
 @CordaSerializable
-sealed class SettlementOracleResult {
-    data class Success(val stx: SignedTransaction) : SettlementOracleResult()
-    data class Failure(val stx: SignedTransaction?, val message: String) : SettlementOracleResult()
-}
+data class FxRateRequest(val baseCurrency: TokenType, val counterCurrency: TokenType, val time: Instant)
 
 @CordaSerializable
-data class FxRateRequest(val baseCurrency: TokenType, val counterCurrency: TokenType, val time: Instant)
+data class FxRate(val baseCurrency: TokenType, val counterCurrency: TokenType, val time: Instant, val rate: BigDecimal)
 
 typealias FxRateResponse = FxRate

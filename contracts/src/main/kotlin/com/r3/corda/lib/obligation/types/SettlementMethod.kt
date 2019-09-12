@@ -12,10 +12,3 @@ interface SettlementMethod {
     /** The public key, account number or whatever, that payment should be made to. */
     val accountToPay: Any
 }
-
-/**
- * A simple fx rate type.
- * TODO: Replace this with a proper fx library.
- */
-@CordaSerializable
-data class FxRate(val baseCurrency: TokenType, val counterCurrency: TokenType, val time: Instant, val rate: Number)

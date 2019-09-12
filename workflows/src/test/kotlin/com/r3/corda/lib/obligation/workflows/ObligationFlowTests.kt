@@ -35,10 +35,10 @@ class ObligationFlowTests {
     private lateinit var mockNet: MockNetwork
     private lateinit var aliceNode: StartedMockNode
     private lateinit var bobNode: StartedMockNode
-    private lateinit var charlieNode: StartedMockNode
+    private lateinit var oracleNode: StartedMockNode
     private lateinit var alice: Party
     private lateinit var bob: Party
-    private lateinit var charlie: Party
+    private lateinit var oracle: Party
     private lateinit var notary: Party
     private val DUE_DATE: Instant = Instant.now().plusSeconds(10000)
 
@@ -52,8 +52,7 @@ class ObligationFlowTests {
                                 TestCordapp.findCordapp("com.r3.corda.lib.ci"),
                                 TestCordapp.findCordapp("com.r3.corda.lib.obligation.contracts"),
                                 TestCordapp.findCordapp("com.r3.corda.lib.obligation.oracle.flows"),
-                                TestCordapp.findCordapp( "com.r3.corda.lib.obligation.api"),
-                                TestCordapp.findCordapp("com.r3.corda.lib.obligation.flows"),
+                                TestCordapp.findCordapp("com.r3.corda.lib.obligation.api"),
                                 TestCordapp.findCordapp("com.r3.corda.lib.obligation.workflows")
                         ),
                         threadPerNode = true
@@ -61,10 +60,10 @@ class ObligationFlowTests {
         )
         aliceNode = mockNet.createPartyNode(ALICE_NAME)
         bobNode = mockNet.createPartyNode(BOB_NAME)
-        charlieNode = mockNet.createPartyNode(CHARLIE_NAME)
+        oracleNode = mockNet.createPartyNode(CHARLIE_NAME)
         alice = aliceNode.info.singleIdentity()
         bob = bobNode.info.singleIdentity()
-        charlie = charlieNode.info.singleIdentity()
+        oracle = oracleNode.info.singleIdentity()
         notary = mockNet.defaultNotaryIdentity
 
         mockNet.startNodes()
@@ -132,13 +131,13 @@ class ObligationFlowTests {
         val anonObligee = anonObligation.state.data.obligee
         val anonObligor = anonObligation.state.data.obligor
 
-        // Charlie can resolve the parties from the network map cache
-        assertThat(charlieNode.services.identityService.wellKnownPartyFromAnonymous(publicObligee)).isEqualTo(bob)
-        assertThat(charlieNode.services.identityService.wellKnownPartyFromAnonymous(publicObligor)).isEqualTo(alice)
+        // Oracle can resolve the parties from the network map cache
+        assertThat(oracleNode.services.identityService.wellKnownPartyFromAnonymous(publicObligee)).isEqualTo(bob)
+        assertThat(oracleNode.services.identityService.wellKnownPartyFromAnonymous(publicObligor)).isEqualTo(alice)
 
-        // Charlie shouldn't be able to resolve the anonymous parties
-        assertNull(charlieNode.services.identityService.wellKnownPartyFromAnonymous(anonObligee))
-        assertNull(charlieNode.services.identityService.wellKnownPartyFromAnonymous(anonObligor))
+        // Oracle shouldn't be able to resolve the anonymous parties
+        assertNull(oracleNode.services.identityService.wellKnownPartyFromAnonymous(anonObligee))
+        assertNull(oracleNode.services.identityService.wellKnownPartyFromAnonymous(anonObligor))
 
     }
 
@@ -153,7 +152,7 @@ class ObligationFlowTests {
         val novationCommand = ObligationCommands.Novate.UpdateFaceAmountToken(
                 oldToken = USD,
                 newToken = XRP,
-                oracle = charlieNode.services.myInfo.legalIdentities.first(),
+                oracle = oracleNode.services.myInfo.legalIdentities.first(),
                 fxRate = null
         )
 
