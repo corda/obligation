@@ -51,12 +51,6 @@ allprojects {
         }
     }
 
-    configurations.all {
-        resolutionStrategy {
-            cacheChangingModulesFor 0, 'seconds'
-        }
-    }
-
     repositories {
         jcenter()
         mavenCentral()
@@ -67,8 +61,50 @@ allprojects {
         maven { url "http://ci-artifactory.corda.r3cev.com/artifactory/corda-releases" }
         maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-lib' }
         maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-lib-dev' }
+    }   
+
+    configurations.all {
+        resolutionStrategy {
+            cacheChangingModulesFor 0, 'seconds'
+        }
+    }
+}
+//
+//    }
+//
+//
+//    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+//        kotlinOptions {
+//            languageVersion = "1.2"
+//            apiVersion = "1.2"
+//            jvmTarget = "1.8"
+//            javaParameters = true   // Useful for reflection.
+//        }
+//    }
+//
+//    tasks.withType(Jar).all {
+//        jar {
+//            exclude "**/log4j2*.xml"
+//        }
+//    }
+//}
+subprojects {
+    buildscript {
+        repositories {
+            jcenter()
+            mavenCentral()
+        }
     }
 
+    repositories {
+        jcenter()
+        mavenLocal()
+        maven { url 'https://jitpack.io' }
+        maven { url "http://ci-artifactory.corda.r3cev.com/artifactory/corda-dev" }
+        maven { url "http://ci-artifactory.corda.r3cev.com/artifactory/corda-releases" }
+        maven { url "http://ci-artifactory.corda.r3cev.com/artifactory/corda-lib" }
+        maven { url "http://ci-artifactory.corda.r3cev.com/artifactory/corda-lib-dev" }
+    }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
@@ -79,70 +115,65 @@ allprojects {
         }
     }
 
-    tasks.withType(Jar).all {
-        jar {
-            exclude "**/log4j2*.xml"
+    apply plugin: 'kotlin'
+}
+
+//apply plugin: 'net.corda.plugins.cordapp'
+//apply plugin: 'net.corda.plugins.cordformation'
+//apply plugin: 'net.corda.plugins.quasar-utils'
+
+def publishProjects = [project(":contracts"), project(":workflows")]
+
+configure(publishProjects) { subproject ->
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.artifactory'
+
+    task sourceJar(type: Jar, dependsOn: subproject.classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: subproject.javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    task install(dependsOn: 'publishToMavenLocal')
+
+    publishing {
+        publications {
+            create(subproject.name, MavenPublication) {
+                from components.java
+
+                groupId subproject.group
+                artifactId subproject.jar.baseName
+                artifact tasks.sourceJar
+                artifact tasks.javadocJar
+
+                pom {
+                    description = subproject.description
+                }
+            }
         }
     }
 }
 
-apply plugin: 'kotlin'
-apply plugin: 'net.corda.plugins.cordapp'
-apply plugin: 'net.corda.plugins.cordformation'
-apply plugin: 'net.corda.plugins.quasar-utils'
-//
-//def publishProjects = [project(":contracts"), project(":workflows")]
-//
-//configure(publishProjects) { subproject ->
-//    apply plugin: 'maven-publish'
-//    apply plugin: 'com.jfrog.artifactory'
-//
-//    task sourceJar(type: Jar, dependsOn: subproject.classes) {
-//        classifier = 'sources'
-//        from sourceSets.main.allSource
-//    }
-//
-//    task javadocJar(type: Jar, dependsOn: subproject.javadoc) {
-//        classifier = 'javadoc'
-//        from javadoc.destinationDir
-//    }
-//
-//    task install(dependsOn: 'publishToMavenLocal')
-//
-//    publishing {
-//        publications {
-//            create(subproject.name, MavenPublication) {
-//                from components.java
-//
-//                groupId subproject.group
-//                artifactId subproject.jar.baseName
-//                artifact tasks.sourceJar
-//                artifact tasks.javadocJar
-//
-//                pom {
-//                    description = subproject.description
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//artifactory {
-//    publish {
-//        contextUrl = 'https://ci-artifactory.corda.r3cev.com/artifactory'
-//        repository {
-//            repoKey = 'corda-lib-dev'
-//            username = System.getenv('CORDA_ARTIFACTORY_USERNAME') ?: System.getProperty('corda.artifactory.username')
-//            password = System.getenv('CORDA_ARTIFACTORY_PASSWORD') ?: System.getProperty('corda.artifactory.password')
-//        }
-//
-//        defaults {
-//            if (publishProjects.contains(project)) {
-//                publications(project.name)
-//            }
-//        }
-//    }
-//}
+artifactory {
+    publish {
+        contextUrl = 'https://ci-artifactory.corda.r3cev.com/artifactory'
+        repository {
+            repoKey = 'corda-lib-dev'
+            username = System.getenv('CORDA_ARTIFACTORY_USERNAME') ?: System.getProperty('corda.artifactory.username')
+            password = System.getenv('CORDA_ARTIFACTORY_PASSWORD') ?: System.getProperty('corda.artifactory.password')
+        }
+
+        defaults {
+            if (publishProjects.contains(project)) {
+                publications(project.name)
+            }
+        }
+    }
+}
 
 wrapper {
     gradleVersion = "4.10.2"

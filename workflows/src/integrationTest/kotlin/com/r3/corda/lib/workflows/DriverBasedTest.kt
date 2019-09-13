@@ -1,4 +1,4 @@
-package com.r3.corda.lib.ci
+package com.r3.corda.lib.workflows
 
 import com.r3.corda.lib.obligation.RequestKey
 import com.r3.corda.lib.obligation.SyncKeyMappingInitiator
