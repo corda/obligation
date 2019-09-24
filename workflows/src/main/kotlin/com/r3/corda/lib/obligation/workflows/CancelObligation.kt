@@ -14,7 +14,7 @@ import net.corda.core.utilities.ProgressTracker
 
 @InitiatingFlow
 @StartableByRPC
-class CancelObligationInitiator(val linearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
+class CancelObligation(val linearId: UniqueIdentifier) : FlowLogic<SignedTransaction>() {
 
     companion object {
         object INITIALISING : ProgressTracker.Step("Performing initial steps.")
@@ -79,7 +79,7 @@ class CancelObligationInitiator(val linearId: UniqueIdentifier) : FlowLogic<Sign
     }
 }
 
-@InitiatedBy(CancelObligationInitiator::class)
+@InitiatedBy(CancelObligation::class)
 class CancelObligationResponder(val otherSession: FlowSession) : FlowLogic<SignedTransaction>() {
 
     @Suspendable

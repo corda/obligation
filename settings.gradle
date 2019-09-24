@@ -1,7 +1,4 @@
 include 'contracts'
 include 'oracle'
-include 'payment-methods:manual'
-include 'payment-methods:ripple'
-include 'payment-methods:swift'
 include 'workflows-api'
 include 'workflows'

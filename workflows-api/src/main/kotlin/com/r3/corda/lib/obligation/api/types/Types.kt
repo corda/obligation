@@ -1,4 +1,4 @@
-package com.r3.corda.lib.obligation.types
+package com.r3.corda.lib.obligation.api.types
 
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.serialization.CordaSerializable

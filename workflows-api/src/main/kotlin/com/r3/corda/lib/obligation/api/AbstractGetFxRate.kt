@@ -1,6 +1,6 @@
 package com.r3.corda.lib.obligation.api
 
-import com.r3.corda.lib.obligation.types.FxRateResponse
+import com.r3.corda.lib.obligation.api.types.FxRateResponse
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 

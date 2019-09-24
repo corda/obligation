@@ -46,9 +46,9 @@ fun <T : TokenType>createObligation(us: AbstractParty, them: AbstractParty, amou
 }
 
 @CordaInternal
-fun createNewKey(serviceHub: ServiceHub) : AnonymousParty {
-    val newKey = serviceHub.keyManagementService.freshKey()
-    registerKeyToParty(newKey, serviceHub.myInfo.legalIdentities.first(), serviceHub)
+fun ServiceHub.createNewKey() : AnonymousParty {
+    val newKey = keyManagementService.freshKey()
+    registerKeyToParty(newKey, this.myInfo.legalIdentities.first(), this)
     return AnonymousParty(newKey)
 }
 

@@ -56,8 +56,8 @@ dependencies {
         changing = true
     }
 
-    //contracts and states dependency.
-    cordaCompile project(":contracts")
+    // Tokens SDK dependencies.
+    cordaCompile "$tokens_release_group:tokens-contracts:$tokens_release_version"
 }
 
 jar {

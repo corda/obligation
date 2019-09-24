@@ -19,7 +19,7 @@ class CreateAnonymousObligation<T : TokenType>(
 
     @Suspendable
     override fun call(): Pair<Obligation<T>, PublicKey> {
-        val anonymousObligee = createNewKey(serviceHub)
+        val anonymousObligee = serviceHub.createNewKey()
         val anonymousObligor = subFlow(RequestKeyFlow(lenderSession))
         return createObligation(us = anonymousObligee, them = anonymousObligor, amount = amount, role = role, dueBy = dueBy)
     }

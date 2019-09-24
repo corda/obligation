@@ -83,7 +83,7 @@ class ObligationFlowTests {
         val obligationId = tx.toLedgerTransaction(aliceNode.services).singleOutput<Obligation<TokenType>>().linearId
 
         // Cancel it
-        aliceNode.startFlow(CancelObligationInitiator(obligationId)).let {
+        aliceNode.startFlow(CancelObligation(obligationId)).let {
             it.getOrThrow()
         }
 

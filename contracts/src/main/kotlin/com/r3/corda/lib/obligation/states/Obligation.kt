@@ -1,6 +1,7 @@
 package com.r3.corda.lib.obligation.states
 
 import com.r3.corda.lib.obligation.contracts.ObligationContract
+import com.r3.corda.lib.obligation.types.Payment
 import com.r3.corda.lib.obligation.types.SettlementMethod
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
@@ -48,7 +49,7 @@ data class Obligation<T : TokenType>(
         /** Settlement methods the obligee will accept: On ledger, off ledger (crypto, swift, PISP, paypal, etc.). */
         val settlementMethod: SettlementMethod? = null,
         /** The obligation can be paid in parts. This lists all payments in respect of this obligation */
-        val payments: List<com.r3.corda.lib.obligation.types.Payment<T>> = emptyList(),
+        val payments: List<Payment<T>> = emptyList(),
         /** Unique identifier for the obligation. */
         override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : LinearState {
@@ -114,7 +115,7 @@ data class Obligation<T : TokenType>(
     }
 
     /** Add a new payment to the payments list. */
-    fun withPayment(payment: com.r3.corda.lib.obligation.types.Payment<T>): Obligation<T> {
+    fun withPayment(payment: Payment<T>): Obligation<T> {
         val newAmountPaid = amountPaid + payment.amount
         return if (newAmountPaid > faceAmount) {
             throw IllegalStateException("You cannot over pay an obligation.")
