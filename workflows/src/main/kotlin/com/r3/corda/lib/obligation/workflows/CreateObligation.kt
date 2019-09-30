@@ -19,8 +19,8 @@ import java.time.ZoneOffset
 
 @InitiatingFlow
 @StartableByRPC
-class CreateObligation<T : TokenType>(
-        private val amount: Amount<T>,
+class CreateObligation(
+        private val amount: Amount<TokenType>,
         private val role: InitiatorRole,
         private val counterparty: Party,
         private val dueBy: Instant? = null,

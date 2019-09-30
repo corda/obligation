@@ -1,8 +1,8 @@
 package com.r3.corda.lib.obligation.workflows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.lib.obligation.api.types.FxRateRequest
-import com.r3.corda.lib.obligation.api.types.FxRateResponse
+import com.r3.corda.lib.obligation.api.FxRateRequest
+import com.r3.corda.lib.obligation.api.FxRateResponse
 import com.r3.corda.lib.obligation.commands.ObligationCommands
 import com.r3.corda.lib.obligation.contracts.ObligationContract
 import com.r3.corda.lib.obligation.states.Obligation

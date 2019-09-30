@@ -9,6 +9,7 @@ import net.corda.core.contracts.TypeOnlyCommandData
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
+import java.math.BigDecimal
 import java.time.Instant
 
 /** All the things you can do with an obligation. */
@@ -39,7 +40,7 @@ interface ObligationCommands : CommandData {
                 val oldToken: OLD,
                 val newToken: NEW,
                 val oracle: Party,
-                val fxRate: Number? = null
+                val fxRate: BigDecimal? = null
         ) : ObligationCommands.Novate()
 
         /** Change the due by date. */

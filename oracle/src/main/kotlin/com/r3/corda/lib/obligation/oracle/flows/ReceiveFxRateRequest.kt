@@ -2,8 +2,8 @@ package com.r3.corda.lib.obligation.oracle.flows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.obligation.api.AbstractGetFxRate
-import com.r3.corda.lib.obligation.api.types.FxRate
-import com.r3.corda.lib.obligation.api.types.FxRateRequest
+import com.r3.corda.lib.obligation.api.FxRate
+import com.r3.corda.lib.obligation.api.FxRateRequest
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowSession
 import net.corda.core.flows.InitiatedBy

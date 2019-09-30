@@ -5,6 +5,7 @@ import net.corda.core.serialization.SerializationWhitelist
 
 class SerializationWhitelist : SerializationWhitelist {
     override val whitelist = listOf(
-            TokenizableAssetInfo::class.java
+            TokenizableAssetInfo::class.java,
+            java.lang.Number::class.java
     )
 }

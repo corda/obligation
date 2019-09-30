@@ -39,6 +39,11 @@ sourceSets {
     }
 }
 
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
 dependencies {
     // Kotlin.
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -72,4 +77,9 @@ dependencies {
 
 jar {
     baseName = "obligation-workflows"
+}
+
+task integrationTest(type: Test, dependsOn: []) {
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
 }

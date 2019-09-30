@@ -3,6 +3,7 @@ package com.r3.corda.lib.obligation.workflows
 import com.r3.corda.lib.obligation.commands.ObligationCommands
 import com.r3.corda.lib.obligation.states.Obligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
+import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.contracts.utilities.singleOutput
 import com.r3.corda.lib.tokens.money.GBP
 import com.r3.corda.lib.tokens.money.USD
@@ -77,7 +78,7 @@ class ObligationFlowTests {
     @Test
     fun `create obligation then cancel it`() {
         // Create obligation
-        val tx = aliceNode.startFlow(CreateObligation(AMOUNT(10000, GBP), InitiatorRole.OBLIGOR, bob, DUE_DATE)).let {
+        val tx = aliceNode.startFlow(CreateObligation(1000 of GBP, InitiatorRole.OBLIGOR, bob, DUE_DATE)).let {
             it.getOrThrow()
         }
         val obligationId = tx.toLedgerTransaction(aliceNode.services).singleOutput<Obligation<TokenType>>().linearId
@@ -97,7 +98,7 @@ class ObligationFlowTests {
 
     @Test
     fun `newly created obligation is stored in vaults of participants`() {
-        val tx = aliceNode.startFlow(CreateObligation(AMOUNT(10000, GBP), InitiatorRole.OBLIGOR, bob, DUE_DATE)).let {
+        val tx = aliceNode.startFlow(CreateObligation(1000 of GBP, InitiatorRole.OBLIGOR, bob, DUE_DATE)).let {
             it.getOrThrow()
         }
         val obligationId = tx.toLedgerTransaction(aliceNode.services).singleOutput<Obligation<TokenType>>().linearId
@@ -112,18 +113,18 @@ class ObligationFlowTests {
     @Test
     fun `anonymous obligation parties are confidential to the parties involved`() {
         // Create obligation
-        val publicTx = aliceNode.startFlow(CreateObligation(AMOUNT(10000, GBP), InitiatorRole.OBLIGOR, bob, DUE_DATE, false)).let {
+        val publicTx = aliceNode.startFlow(CreateObligation(1000 of GBP, InitiatorRole.OBLIGOR, bob, DUE_DATE, false)).let {
             it.getOrThrow()
         }
         // Create anonymous obligation
-        val anonTx = aliceNode.startFlow(CreateObligation(AMOUNT(10000, GBP), InitiatorRole.OBLIGOR, bob, DUE_DATE)).let {
+        val anonTx = aliceNode.startFlow(CreateObligation(1000 of GBP, InitiatorRole.OBLIGOR, bob, DUE_DATE, true)).let {
             it.getOrThrow()
         }
-        val publicOblicationId = publicTx.toLedgerTransaction(aliceNode.services).singleOutput<Obligation<TokenType>>().linearId
-        val anonOblicationId = anonTx.toLedgerTransaction(aliceNode.services).singleOutput<Obligation<TokenType>>().linearId
+        val publicObligationId = publicTx.toLedgerTransaction(aliceNode.services).singleOutput<Obligation<TokenType>>().linearId
+        val anonObligationId = anonTx.toLedgerTransaction(aliceNode.services).singleOutput<Obligation<TokenType>>().linearId
 
-        val publicObligation = aliceNode.queryObligationById(publicOblicationId)
-        val anonObligation = aliceNode.queryObligationById(anonOblicationId)
+        val publicObligation = aliceNode.queryObligationById(publicObligationId)
+        val anonObligation = aliceNode.queryObligationById(anonObligationId)
 
         val publicObligee = publicObligation.state.data.obligee
         val publicObligor = publicObligation.state.data.obligor
@@ -144,7 +145,7 @@ class ObligationFlowTests {
     @Test
     fun `novate obligation currency`() {
         // Create obligation
-        val tx = aliceNode.startFlow(CreateObligation(AMOUNT(10000, GBP), InitiatorRole.OBLIGOR, bob, DUE_DATE)).let {
+        val tx = aliceNode.startFlow(CreateObligation(1000 of GBP, InitiatorRole.OBLIGOR, bob, DUE_DATE)).let {
             it.getOrThrow()
         }
         val obligationId = tx.toLedgerTransaction(aliceNode.services).singleOutput<Obligation<TokenType>>().linearId
