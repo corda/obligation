@@ -1,8 +1,9 @@
 package com.r3.corda.lib.obligation.workflows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.lib.ci.RequestKeyFlow
-import com.r3.corda.lib.ci.RequestKeyResponder
+import com.r3.corda.lib.ci.workflows.ProvideKeyFlow
+import com.r3.corda.lib.ci.workflows.RequestKeyFlow
+import com.r3.corda.lib.ci.workflows.RequestKeyResponder
 import com.r3.corda.lib.obligation.states.Obligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
@@ -19,15 +20,16 @@ class CreateAnonymousObligation<T : TokenType>(
 
     @Suspendable
     override fun call(): Pair<Obligation<T>, PublicKey> {
-        val anonymousObligee = serviceHub.createNewKey()
+        val anonymousObligee = subFlow(ProvideKeyFlow(lenderSession))
         val anonymousObligor = subFlow(RequestKeyFlow(lenderSession))
         return createObligation(us = anonymousObligee, them = anonymousObligor, amount = amount, role = role, dueBy = dueBy)
     }
 }
 
-class CreateAnonymousObligationResponder(val otherFlow: FlowSession) : FlowLogic<Unit>() {
+class CreateAnonymousObligationResponder(val otherSideSession: FlowSession) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
-        subFlow(RequestKeyResponder(otherSession = otherFlow))
+        subFlow(RequestKeyFlow(otherSideSession))
+        subFlow(RequestKeyResponder(otherSession = otherSideSession))
     }
 }

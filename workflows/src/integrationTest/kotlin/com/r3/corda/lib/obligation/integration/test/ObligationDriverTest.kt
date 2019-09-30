@@ -1,4 +1,4 @@
-package com.r3.corda.lib.workflows
+package com.r3.corda.lib.obligation.integration.test
 
 import com.r3.corda.lib.obligation.commands.ObligationCommands
 import com.r3.corda.lib.obligation.states.Obligation

@@ -1,6 +1,5 @@
 package com.r3.corda.lib.obligation.workflows
 
-import com.r3.corda.lib.ci.registerKeyToParty
 import com.r3.corda.lib.obligation.commands.ObligationCommands
 import com.r3.corda.lib.obligation.states.Obligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
@@ -45,13 +44,6 @@ fun <T : TokenType>createObligation(us: AbstractParty, them: AbstractParty, amou
             InitiatorRole.OBLIGOR -> Obligation(amount, us, them, dueBy)
         }
         return Pair(obligation, us.owningKey)
-}
-
-@CordaInternal
-fun ServiceHub.createNewKey() : AnonymousParty {
-    val newKey = keyManagementService.freshKey()
-    registerKeyToParty(newKey, this.myInfo.legalIdentities.first(), this)
-    return AnonymousParty(newKey)
 }
 
 /**

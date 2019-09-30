@@ -1,7 +1,11 @@
-package com.r3.corda.lib.obligation.workflows
+package com.r3.corda.lib.obligation.test
 
 import com.r3.corda.lib.obligation.commands.ObligationCommands
 import com.r3.corda.lib.obligation.states.Obligation
+import com.r3.corda.lib.obligation.workflows.CancelObligation
+import com.r3.corda.lib.obligation.workflows.CreateObligation
+import com.r3.corda.lib.obligation.workflows.InitiatorRole
+import com.r3.corda.lib.obligation.workflows.NovateObligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.contracts.utilities.singleOutput
