@@ -1,8 +1,8 @@
-package com.r3.corda.lib.obligation.states
+package com.r3.corda.lib.obligation.contracts.states
 
 import com.r3.corda.lib.obligation.contracts.ObligationContract
-import com.r3.corda.lib.obligation.types.Payment
-import com.r3.corda.lib.obligation.types.SettlementMethod
+import com.r3.corda.lib.obligation.contracts.types.Payment
+import com.r3.corda.lib.obligation.contracts.types.SettlementMethod
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.BelongsToContract
@@ -62,7 +62,7 @@ data class Obligation<T : TokenType>(
 
     /** The sum of amounts for all payments. */
     val amountPaid: Amount<T> get() = payments
-            .filter { it.status == com.r3.corda.lib.obligation.types.PaymentStatus.SETTLED }
+            .filter { it.status == com.r3.corda.lib.obligation.contracts.types.PaymentStatus.SETTLED }
             .map { it.amount }
             .fold(Amount.zero(faceAmount.token)) { acc, amount -> acc + amount }
 

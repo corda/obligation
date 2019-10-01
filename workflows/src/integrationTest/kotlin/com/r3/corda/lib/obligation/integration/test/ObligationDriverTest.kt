@@ -1,8 +1,11 @@
 package com.r3.corda.lib.obligation.integration.test
 
-import com.r3.corda.lib.obligation.commands.ObligationCommands
-import com.r3.corda.lib.obligation.states.Obligation
-import com.r3.corda.lib.obligation.workflows.*
+import com.r3.corda.lib.obligation.contracts.commands.ObligationCommands
+import com.r3.corda.lib.obligation.contracts.states.Obligation
+import com.r3.corda.lib.obligation.workflows.CancelObligation
+import com.r3.corda.lib.obligation.workflows.CreateAndReturnObligationId
+import com.r3.corda.lib.obligation.workflows.InitiatorRole
+import com.r3.corda.lib.obligation.workflows.NovateAndReturnObligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import com.r3.corda.lib.tokens.money.GBP
@@ -14,7 +17,10 @@ import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.utilities.getOrThrow
 import net.corda.node.services.Permissions
-import net.corda.testing.core.*
+import net.corda.testing.core.ALICE_NAME
+import net.corda.testing.core.BOB_NAME
+import net.corda.testing.core.CHARLIE_NAME
+import net.corda.testing.core.singleIdentity
 import net.corda.testing.driver.DriverDSL
 import net.corda.testing.driver.DriverParameters
 import net.corda.testing.driver.NodeHandle

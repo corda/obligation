@@ -1,7 +1,7 @@
 package com.r3.corda.lib.obligation.test
 
-import com.r3.corda.lib.obligation.commands.ObligationCommands
-import com.r3.corda.lib.obligation.states.Obligation
+import com.r3.corda.lib.obligation.contracts.commands.ObligationCommands
+import com.r3.corda.lib.obligation.contracts.states.Obligation
 import com.r3.corda.lib.obligation.workflows.CancelObligation
 import com.r3.corda.lib.obligation.workflows.CreateObligation
 import com.r3.corda.lib.obligation.workflows.InitiatorRole
@@ -17,7 +17,6 @@ import net.corda.core.node.services.Vault
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.utilities.getOrThrow
-import net.corda.finance.AMOUNT
 import net.corda.testing.common.internal.testNetworkParameters
 import net.corda.testing.core.ALICE_NAME
 import net.corda.testing.core.BOB_NAME
@@ -27,9 +26,9 @@ import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.MockNetworkParameters
 import net.corda.testing.node.StartedMockNode
 import net.corda.testing.node.TestCordapp
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Assert.assertNull
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import java.time.Instant
@@ -53,12 +52,13 @@ class ObligationFlowTests {
                 MockNetworkParameters(
                         networkParameters = testNetworkParameters(minimumPlatformVersion = 4),
                         cordappsForAllNodes = listOf(
+                                TestCordapp.findCordapp("com.r3.corda.lib.tokens.contracts"),
                                 TestCordapp.findCordapp("com.r3.corda.lib.tokens.money"),
                                 TestCordapp.findCordapp("com.r3.corda.lib.ci"),
                                 TestCordapp.findCordapp("com.r3.corda.lib.obligation.contracts"),
-                                TestCordapp.findCordapp("com.r3.corda.lib.obligation.oracle.flows"),
                                 TestCordapp.findCordapp("com.r3.corda.lib.obligation.api"),
-                                TestCordapp.findCordapp("com.r3.corda.lib.obligation.workflows")
+                                TestCordapp.findCordapp("com.r3.corda.lib.obligation.workflows"),
+                                TestCordapp.findCordapp("com.r3.corda.lib.obligation.oracle.flows")
                         ),
                         threadPerNode = true
                 )

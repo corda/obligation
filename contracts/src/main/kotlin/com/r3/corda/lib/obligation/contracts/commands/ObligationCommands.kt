@@ -1,7 +1,8 @@
-package com.r3.corda.lib.obligation.commands
+package com.r3.corda.lib.obligation.contracts.commands
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.r3.corda.lib.obligation.contracts.types.PaymentReference
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.CommandData
@@ -54,10 +55,10 @@ interface ObligationCommands : CommandData {
     class UpdateSettlementMethod : ObligationCommands, TypeOnlyCommandData()
 
     /** Record that a payment was made in respect of an obligation. */
-    data class AddPayment(val ref: com.r3.corda.lib.obligation.types.PaymentReference) : ObligationCommands
+    data class AddPayment(val ref: PaymentReference) : ObligationCommands
 
     /** Update the settlement status of a payment. */
-    data class UpdatePayment(val ref: com.r3.corda.lib.obligation.types.PaymentReference) : ObligationCommands
+    data class UpdatePayment(val ref: PaymentReference) : ObligationCommands
 
     /** Cancel the obligation - involves exiting the obligation state from the ledger. */
     data class Cancel(val id: UniqueIdentifier) : ObligationCommands, TypeOnlyCommandData()

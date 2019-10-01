@@ -4,7 +4,7 @@ import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.ci.workflows.ProvideKeyFlow
 import com.r3.corda.lib.ci.workflows.RequestKeyFlow
 import com.r3.corda.lib.ci.workflows.RequestKeyResponder
-import com.r3.corda.lib.obligation.states.Obligation
+import com.r3.corda.lib.obligation.contracts.states.Obligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.Amount
 import net.corda.core.flows.FlowLogic
