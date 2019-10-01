@@ -2,6 +2,7 @@ package com.r3.corda.lib.obligation.contracts
 
 import com.r3.corda.lib.obligation.contracts.commands.ObligationCommands
 import com.r3.corda.lib.obligation.contracts.states.Obligation
+import com.r3.corda.lib.obligation.contracts.types.PaymentStatus
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.singleInput
 import com.r3.corda.lib.tokens.contracts.utilities.singleOutput
@@ -237,7 +238,7 @@ class ObligationContract : Contract {
         }
         require(input.payments.size + 1 == output.payments.size) { "You can only add one payment at once." }
         val payment = output.payments.single { it.paymentReference == command.value.ref }
-        require(payment.status == com.r3.corda.lib.obligation.contracts.types.PaymentStatus.SENT) { "Payments can only be added with a SENT status." }
+        require(payment.status == PaymentStatus.SENT) { "Payments can only be added with a SENT status." }
     }
 
     private fun handleUpdatePayment(tx: LedgerTransaction) {
@@ -256,6 +257,6 @@ class ObligationContract : Contract {
         )
         checkPropertyInvariants(input, output, invariantProperties)
         val inputPayment = input.payments.single { it.paymentReference == command.value.ref }
-        require(inputPayment.status == com.r3.corda.lib.obligation.contracts.types.PaymentStatus.SENT) { "Only payments with a SENT status can be updated." }
+        require(inputPayment.status == PaymentStatus.SENT) { "Only payments with a SENT status can be updated." }
     }
 }
