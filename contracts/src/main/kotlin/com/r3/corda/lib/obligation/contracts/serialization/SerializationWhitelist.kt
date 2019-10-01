@@ -1,4 +1,4 @@
-package com.r3.corda.lib.obligation.serialization
+package com.r3.corda.lib.obligation.contracts.serialization
 
 import net.corda.core.contracts.TokenizableAssetInfo
 import net.corda.core.serialization.SerializationWhitelist

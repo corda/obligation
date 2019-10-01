@@ -1,6 +1,6 @@
 package com.r3.corda.lib.obligation.test
 
-import com.r3.corda.lib.obligation.states.Obligation
+import com.r3.corda.lib.obligation.contracts.states.Obligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier

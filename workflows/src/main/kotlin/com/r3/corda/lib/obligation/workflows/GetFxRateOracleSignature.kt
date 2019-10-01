@@ -2,7 +2,7 @@ package com.r3.corda.lib.obligation.workflows
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.obligation.api.AbstractGetFxOracleSignature
-import com.r3.corda.lib.obligation.commands.ObligationCommands
+import com.r3.corda.lib.obligation.contracts.commands.ObligationCommands
 import net.corda.core.contracts.Command
 import net.corda.core.crypto.TransactionSignature
 import net.corda.core.identity.Party

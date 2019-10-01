@@ -1,1 +1,1 @@
- com.r3.corda.lib.obligation.serialization.SerializationWhitelist
+ com.r3.corda.lib.obligation.contracts.serialization.SerializationWhitelist

@@ -1,8 +1,8 @@
 package com.r3.corda.lib.obligation.workflows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.r3.corda.lib.obligation.commands.ObligationCommands
-import com.r3.corda.lib.obligation.states.Obligation
+import com.r3.corda.lib.obligation.contracts.commands.ObligationCommands
+import com.r3.corda.lib.obligation.contracts.states.Obligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.*

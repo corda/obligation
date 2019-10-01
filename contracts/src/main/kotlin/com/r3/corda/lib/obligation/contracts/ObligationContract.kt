@@ -1,7 +1,7 @@
 package com.r3.corda.lib.obligation.contracts
 
-import com.r3.corda.lib.obligation.commands.ObligationCommands
-import com.r3.corda.lib.obligation.states.Obligation
+import com.r3.corda.lib.obligation.contracts.commands.ObligationCommands
+import com.r3.corda.lib.obligation.contracts.states.Obligation
 import com.r3.corda.lib.tokens.contracts.types.TokenType
 import com.r3.corda.lib.tokens.contracts.utilities.singleInput
 import com.r3.corda.lib.tokens.contracts.utilities.singleOutput
@@ -185,7 +185,7 @@ class ObligationContract : Contract {
         checkPropertyInvariants(input, output, invariantProperties)
         require(input.dueBy != output.dueBy) { "The due by date must change." }
         if (output.dueBy != null) {
-            require(output.dueBy > Instant.now()) { "The due by date cannot." }
+            require(output.dueBy!! > Instant.now()) { "The due by date cannot." }
         }
         require(command.signers.toSet() == output.participants.map { it.owningKey}.toSet()) {
             "Both the obligor and obligee must sign the transaction to update the due date."
@@ -237,7 +237,7 @@ class ObligationContract : Contract {
         }
         require(input.payments.size + 1 == output.payments.size) { "You can only add one payment at once." }
         val payment = output.payments.single { it.paymentReference == command.value.ref }
-        require(payment.status == com.r3.corda.lib.obligation.types.PaymentStatus.SENT) { "Payments can only be added with a SENT status." }
+        require(payment.status == com.r3.corda.lib.obligation.contracts.types.PaymentStatus.SENT) { "Payments can only be added with a SENT status." }
     }
 
     private fun handleUpdatePayment(tx: LedgerTransaction) {
@@ -256,6 +256,6 @@ class ObligationContract : Contract {
         )
         checkPropertyInvariants(input, output, invariantProperties)
         val inputPayment = input.payments.single { it.paymentReference == command.value.ref }
-        require(inputPayment.status == com.r3.corda.lib.obligation.types.PaymentStatus.SENT) { "Only payments with a SENT status can be updated." }
+        require(inputPayment.status == com.r3.corda.lib.obligation.contracts.types.PaymentStatus.SENT) { "Only payments with a SENT status can be updated." }
     }
 }

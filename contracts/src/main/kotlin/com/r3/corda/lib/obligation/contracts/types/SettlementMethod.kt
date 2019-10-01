@@ -1,9 +1,7 @@
-package com.r3.corda.lib.obligation.types
+package com.r3.corda.lib.obligation.contracts.types
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.r3.corda.lib.tokens.contracts.types.TokenType
 import net.corda.core.serialization.CordaSerializable
-import java.security.PublicKey
 
 /** All settlement methods require some key or account that a payment must be made to. */
 @CordaSerializable
