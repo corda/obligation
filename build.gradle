@@ -5,9 +5,9 @@ buildscript {
         obligation_release_group = 'com.r3.corda.lib.obligation'
         obligation_release_version = '1.0-SNAPSHOT'
         tokens_release_group = 'com.r3.corda.lib.tokens'
-        tokens_release_version = '1.1-RC01'
+        tokens_release_version = '1.1'
         confidential_id_release_group = 'com.r3.corda.lib.ci'
-        confidential_id_release_version = '1.0-RC03'
+        confidential_id_release_version = '1.0'
         corda_gradle_plugins_version = '4.0.42'
         kotlin_version = '1.2.71'
         junit_version = '4.12'
@@ -21,7 +21,7 @@ buildscript {
         jcenter()
         mavenCentral()
         mavenLocal()
-        maven { url "https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases" }
+        maven { url "https://software.r3.com/artifactory/corda-releases" }
     }
 
     dependencies {
@@ -57,10 +57,10 @@ allprojects {
         mavenLocal()
         maven { url 'https://jitpack.io' }
         maven { url 'https://repo.gradle.org/gradle/libs-releases' }
-        maven { url "http://ci-artifactory.corda.r3cev.com/artifactory/corda-dev" }
-        maven { url "http://ci-artifactory.corda.r3cev.com/artifactory/corda-releases" }
-        maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-lib' }
-        maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-lib-dev' }
+        maven { url "https://software.r3.com/artifactory/corda-dev" }
+        maven { url "https://software.r3.com/artifactory/corda-releases" }
+        maven { url 'https://software.r3.com/artifactory/corda-lib' }
+        maven { url 'https://software.r3.com/artifactory/corda-lib-dev' }
     }   
 
     configurations.all {
@@ -82,10 +82,10 @@ subprojects {
         jcenter()
         mavenLocal()
         maven { url 'https://jitpack.io' }
-        maven { url "http://ci-artifactory.corda.r3cev.com/artifactory/corda-dev" }
-        maven { url "http://ci-artifactory.corda.r3cev.com/artifactory/corda-releases" }
-        maven { url "http://ci-artifactory.corda.r3cev.com/artifactory/corda-lib" }
-        maven { url "http://ci-artifactory.corda.r3cev.com/artifactory/corda-lib-dev" }
+        maven { url "https://software.r3.com/artifactory/corda-dev" }
+        maven { url "https://software.r3.com/artifactory/corda-releases" }
+        maven { url "https://software.r3.com/artifactory/corda-lib" }
+        maven { url "https://software.r3.com/artifactory/corda-lib-dev" }
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -138,7 +138,7 @@ configure(publishProjects) { subproject ->
 
 artifactory {
     publish {
-        contextUrl = 'https://ci-artifactory.corda.r3cev.com/artifactory'
+        contextUrl = 'https://software.r3.com/artifactory'
         repository {
             repoKey = 'corda-lib-dev'
             username = System.getenv('CORDA_ARTIFACTORY_USERNAME') ?: System.getProperty('corda.artifactory.username')
